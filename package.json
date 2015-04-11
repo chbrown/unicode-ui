@@ -1,0 +1,21 @@
+{
+  "name": "unicode-ui",
+  "description": "Unicode character data viewer and reference",
+  "keywords" : ["unicode", "character", "utf", "user", "interface"],
+  "version": "0.0.1",
+  "homepage": "https://github.com/chbrown/unicode-ui",
+  "repository": "git://github.com/chbrown/unicode-ui.git",
+  "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
+  "license": "MIT",
+  "staticPattern": "lib/{file}",
+  "devDependencies": {
+    "typescript": "*"
+  },
+  "staticDependencies": {
+    "misc-js": {
+      "url": "git://github.com/chbrown/misc-js.git",
+      "filter": ["base64.js", "unicode.js"]
+    },
+    "mithril": "*"
+  }
+}
