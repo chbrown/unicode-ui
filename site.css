@@ -6,4 +6,4 @@ body{font:16px Times}
 div,input,main,nav,section,span,textarea{box-sizing:border-box}
 input,pre,textarea{font:10px Monaco,"Courier New",monospace;padding:2px;resize:none}
 main{margin:10px}
-table.characters td{padding:1px 3px;border-top:1px solid #CCC}
+table.characters td{padding:1px 3px;border-top:1px solid #CCC;white-space:nowrap}

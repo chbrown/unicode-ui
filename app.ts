@@ -167,7 +167,6 @@ function parseUnicodeData(txt: string): Character[] {
 class Ctrl {
   blocks: mithril.MithrilPromise<Block[]>;
   characters: mithril.MithrilPromise<Character[]>;
-  selectedBlockName: string = 'Basic Latin';
   constructor() {
     this.blocks = m.request<Block[]>({
       method: 'GET',
@@ -181,16 +180,20 @@ class Ctrl {
     });
   }
   setBlock(block: Block) {
-    this.selectedBlockName = block.blockName;
+    history.pushState(null, '', `?start=${block.startCode}&end=${block.endCode}`);
   }
   getSelectedCharacters(): Character[] {
-    var selectedBlock = this.blocks().filter(block => block.blockName == this.selectedBlockName)[0];
-    if (selectedBlock) {
-      // search through all 27,268 characters
-      return this.characters().filter(character => {
-        return (character.code >= selectedBlock.startCode) && (character.code <= selectedBlock.endCode);
-      });
-    }
+    var query = {};
+    window.location.search.slice(1).split('&').forEach(arg => {
+      var [key, value] = arg.split('=');
+      query[key] = value;
+    });
+    var selectionStartCode = parseInt(query['start'] || '0', 10);
+    var selectionEndCode = parseInt(query['end'] || '255', 10);
+    // search through all 27,268 characters
+    return this.characters().filter(character => {
+      return (character.code >= selectionStartCode) && (character.code <= selectionEndCode);
+    });
     return [];
   }
 }
@@ -212,14 +215,16 @@ class App {
     var characters = ctrl.getSelectedCharacters().map(character => {
       return m('tr', [
         m('td', character.code),
+        m('td', character.code.toString(16)),
+        m('td', character.code.toString(8)),
         m('td', String.fromCharCode(character.code)),
         m('td', character.name),
         m('td', GeneralCategory[character.generalCategory]),
         m('td', character.combiningClass),
-        m('td', character.numberValue),
-        m('td', character.uppercaseCode),
-        m('td', character.lowercaseCode),
-        m('td', character.titlecaseCode),
+        m('td[title=NumberValue]', character.numberValue),
+        m('td[title=Uppercase]', String.fromCharCode(character.uppercaseCode)),
+        m('td[title=Lowercase]', String.fromCharCode(character.lowercaseCode)),
+        m('td[title=Titlecase]', String.fromCharCode(character.titlecaseCode)),
       ]);
     });
 
@@ -227,15 +232,17 @@ class App {
       m('div', select),
       m('table.characters',
         m('thead', [
-          m('th', 'code'),
+          m('th', 'dec'),
+          m('th', 'hex'),
+          m('th', 'oct'),
           m('th', 'character'),
           m('th', 'name'),
           m('th', 'generalCategory'),
           m('th', 'combiningClass'),
-          m('th', 'numberValue'),
-          m('th', 'uppercaseCode'),
-          m('th', 'lowercaseCode'),
-          m('th', 'titlecaseCode'),
+          m('th[title=NumberValue]', '#'),
+          m('th[title=Uppercase]', 'UC'),
+          m('th[title=Lowercase]', 'LC'),
+          m('th[title=Titlecase]', 'TC'),
         ]),
         m('tbody', characters)
       )
