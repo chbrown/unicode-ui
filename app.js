@@ -191,6 +191,7 @@ There are 14 ;'s per line, and so there are 15 fields per UnicodeDatum:
 function parseUnicodeData(txt) {
     return txt
         .split(/\n/)
+        .filter(function (line) { return line !== ''; })
         .map(function (line) {
         var fields = line.split(';');
         // Code is hexadecimal
@@ -249,33 +250,38 @@ var CharacterTableCtrl = (function () {
             deserialize: parseUnicodeData,
         });
     }
-    CharacterTableCtrl.prototype.setBlock = function (block) {
-        history.pushState(null, '', "?start=" + block.startCode + "&end=" + block.endCode);
+    CharacterTableCtrl.prototype.setStartEnd = function (start, end) {
+        history.pushState(null, '', "?start=" + start + "&end=" + end);
+    };
+    CharacterTableCtrl.prototype.setName = function (name) {
+        history.pushState(null, '', "?name=" + name);
     };
     CharacterTableCtrl.prototype.getSelectedCharacters = function () {
         var query = locationQuery();
+        if (query['name'] && query['name'].length > 0) {
+            // limit to 200
+            var name = query['name'].toUpperCase();
+            return this.characters().filter(function (character) {
+                return character.name.indexOf(name) > -1;
+            }).slice(0, 200);
+        }
+        // otherwise use the ?start= &end= values
         var selectionStartCode = parseInt(query['start'] || '0', 10);
         var selectionEndCode = parseInt(query['end'] || '255', 10);
         // search through all 27,268 characters
         return this.characters().filter(function (character) {
             return (character.code >= selectionStartCode) && (character.code <= selectionEndCode);
         });
-        return [];
     };
     return CharacterTableCtrl;
 })();
-/** Mithril doesn't change thisArg when calling view() */
-function characterTableView(ctrl) {
-    var blocks = ctrl.blocks();
-    var select = m('select', {
-        onchange: function (ev) { ctrl.setBlock(blocks[this.selectedIndex]); }
-    }, blocks.map(function (block) { return m('option', block.blockName + " " + block.startCode + "-" + block.endCode); }));
-    var characters = ctrl.getSelectedCharacters().map(function (character) {
+function ucdTable(characters) {
+    var rows = characters.map(function (character) {
         return m('tr', [
-            m('td', character.code),
-            m('td', character.code.toString(16)),
-            m('td', character.code.toString(8)),
-            m('td', String.fromCharCode(character.code)),
+            m('td.num', character.code),
+            m('td.num', character.code.toString(16).toUpperCase()),
+            m('td.num', character.code.toString(8)),
+            m('td.str', String.fromCharCode(character.code)),
             m('td', character.name),
             m('td', GeneralCategory[character.generalCategory]),
             m('td', character.combiningClass),
@@ -285,9 +291,8 @@ function characterTableView(ctrl) {
             m('td[title=Titlecase]', String.fromCharCode(character.titlecaseCode)),
         ]);
     });
-    return m('main', [
-        m('div', select),
-        m('table.characters', m('thead', [
+    return m('table.characters', [
+        m('thead', [
             m('th', 'dec'),
             m('th', 'hex'),
             m('th', 'oct'),
@@ -299,7 +304,28 @@ function characterTableView(ctrl) {
             m('th[title=Uppercase]', 'UC'),
             m('th[title=Lowercase]', 'LC'),
             m('th[title=Titlecase]', 'TC'),
-        ]), m('tbody', characters))
+        ]),
+        m('tbody', rows)
+    ]);
+}
+/** Mithril doesn't change thisArg when calling view() */
+function characterTableView(ctrl) {
+    var blocks = ctrl.blocks();
+    var options = blocks.map(function (block) { return m('option', block.blockName + " " + block.startCode + "-" + block.endCode); });
+    var select = m('select', {
+        onchange: function (ev) {
+            var block = blocks[this.selectedIndex];
+            ctrl.setStartEnd(block.startCode, block.endCode);
+        }
+    }, options);
+    return m('main', [
+        m('div', select),
+        m('div', [
+            m('input', {
+                onkeyup: function (ev) { ctrl.setName(this.value); }
+            })
+        ]),
+        ucdTable(ctrl.getSelectedCharacters()),
     ]);
 }
 // string app

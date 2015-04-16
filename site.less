@@ -24,12 +24,24 @@ textarea, input, pre {
 main {
   margin: 10px
 }
+section {
+  margin: 10px;
+}
 
 table.characters {
   td {
-    padding: 1px 3px;
+    padding: 2px 4px 0px;
     border-top: 1px solid #CCC;
     white-space: nowrap;
+    font: 14px "Lucida Sans Unicode", "Arial Unicode MS", Arial, sans-serif;
+    line-height: 100%;
+    &.str {
+      font-size: 20px;
+    }
+    &.num {
+      font-family: monospace;
+      text-align: right;
+    }
   }
 }
 table.string {
