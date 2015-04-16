@@ -232,6 +232,10 @@ function locationQuery() {
     });
     return query;
 }
+/**
+Mithril calls `new controller()`, which sets thisArg to the controller
+function itself, instead of the App instance.
+*/
 var CharacterTableCtrl = (function () {
     function CharacterTableCtrl() {
         this.blocks = m.request({
@@ -260,54 +264,44 @@ var CharacterTableCtrl = (function () {
     };
     return CharacterTableCtrl;
 })();
-var CharacterTableApp = (function () {
-    function CharacterTableApp() {
-    }
-    /** Mithril doesn't change thisArg when calling view() */
-    CharacterTableApp.view = function (ctrl) {
-        var blocks = ctrl.blocks();
-        var select = m('select', {
-            onchange: function (ev) { ctrl.setBlock(blocks[this.selectedIndex]); }
-        }, blocks.map(function (block) { return m('option', block.blockName + " " + block.startCode + "-" + block.endCode); }));
-        var characters = ctrl.getSelectedCharacters().map(function (character) {
-            return m('tr', [
-                m('td', character.code),
-                m('td', character.code.toString(16)),
-                m('td', character.code.toString(8)),
-                m('td', String.fromCharCode(character.code)),
-                m('td', character.name),
-                m('td', GeneralCategory[character.generalCategory]),
-                m('td', character.combiningClass),
-                m('td[title=NumberValue]', character.numberValue),
-                m('td[title=Uppercase]', String.fromCharCode(character.uppercaseCode)),
-                m('td[title=Lowercase]', String.fromCharCode(character.lowercaseCode)),
-                m('td[title=Titlecase]', String.fromCharCode(character.titlecaseCode)),
-            ]);
-        });
-        return m('main', [
-            m('div', select),
-            m('table.characters', m('thead', [
-                m('th', 'dec'),
-                m('th', 'hex'),
-                m('th', 'oct'),
-                m('th', 'character'),
-                m('th', 'name'),
-                m('th', 'generalCategory'),
-                m('th', 'combiningClass'),
-                m('th[title=NumberValue]', '#'),
-                m('th[title=Uppercase]', 'UC'),
-                m('th[title=Lowercase]', 'LC'),
-                m('th[title=Titlecase]', 'TC'),
-            ]), m('tbody', characters))
+/** Mithril doesn't change thisArg when calling view() */
+function characterTableView(ctrl) {
+    var blocks = ctrl.blocks();
+    var select = m('select', {
+        onchange: function (ev) { ctrl.setBlock(blocks[this.selectedIndex]); }
+    }, blocks.map(function (block) { return m('option', block.blockName + " " + block.startCode + "-" + block.endCode); }));
+    var characters = ctrl.getSelectedCharacters().map(function (character) {
+        return m('tr', [
+            m('td', character.code),
+            m('td', character.code.toString(16)),
+            m('td', character.code.toString(8)),
+            m('td', String.fromCharCode(character.code)),
+            m('td', character.name),
+            m('td', GeneralCategory[character.generalCategory]),
+            m('td', character.combiningClass),
+            m('td[title=NumberValue]', character.numberValue),
+            m('td[title=Uppercase]', String.fromCharCode(character.uppercaseCode)),
+            m('td[title=Lowercase]', String.fromCharCode(character.lowercaseCode)),
+            m('td[title=Titlecase]', String.fromCharCode(character.titlecaseCode)),
         ]);
-    };
-    /**
-    Mithril calls `new controller()`, which sets thisArg to the controller
-    function itself, instead of the App instance.
-    */
-    CharacterTableApp.controller = CharacterTableCtrl;
-    return CharacterTableApp;
-})();
+    });
+    return m('main', [
+        m('div', select),
+        m('table.characters', m('thead', [
+            m('th', 'dec'),
+            m('th', 'hex'),
+            m('th', 'oct'),
+            m('th', 'character'),
+            m('th', 'name'),
+            m('th', 'generalCategory'),
+            m('th', 'combiningClass'),
+            m('th[title=NumberValue]', '#'),
+            m('th[title=Uppercase]', 'UC'),
+            m('th[title=Lowercase]', 'LC'),
+            m('th[title=Titlecase]', 'TC'),
+        ]), m('tbody', characters))
+    ]);
+}
 // string app
 var StringCtrl = (function () {
     function StringCtrl() {

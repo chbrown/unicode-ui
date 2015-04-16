@@ -10,7 +10,7 @@
 <!-- http://chbrown.github.io/unicode-ui/ or http://ghkl/unicode-ui/ -->
 <body></body>
 <script>
-/*jslint browser: true */ /*globals m, CharacterTableApp*/
+/*jslint browser: true */ /*globals m, CharacterTableCtrl, characterTableView */
 // bootstrap the Mithril app into the body
-m.module(document.body, CharacterTableApp);
+m.module(document.body, {controller: CharacterTableCtrl, view: characterTableView});
 </script>

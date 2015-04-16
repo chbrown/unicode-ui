@@ -174,6 +174,10 @@ function locationQuery(): {[index: string]: string} {
   return query;
 }
 
+/**
+Mithril calls `new controller()`, which sets thisArg to the controller
+function itself, instead of the App instance.
+*/
 class CharacterTableCtrl {
   blocks: mithril.MithrilPromise<Block[]>;
   characters: mithril.MithrilPromise<Character[]>;
@@ -204,55 +208,47 @@ class CharacterTableCtrl {
   }
 }
 
-class CharacterTableApp {
-  /**
-  Mithril calls `new controller()`, which sets thisArg to the controller
-  function itself, instead of the App instance.
-  */
-  static controller = CharacterTableCtrl;
-
-  /** Mithril doesn't change thisArg when calling view() */
-  static view(ctrl: CharacterTableCtrl) {
-    var blocks = ctrl.blocks();
-    var select = m('select', {
-      onchange: function(ev) { ctrl.setBlock(blocks[this.selectedIndex]) }
-    }, blocks.map(block => m('option', `${block.blockName} ${block.startCode}-${block.endCode}`)));
-    var characters = ctrl.getSelectedCharacters().map(character => {
-      return m('tr', [
-        m('td', character.code),
-        m('td', character.code.toString(16)),
-        m('td', character.code.toString(8)),
-        m('td', String.fromCharCode(character.code)),
-        m('td', character.name),
-        m('td', GeneralCategory[character.generalCategory]),
-        m('td', character.combiningClass),
-        m('td[title=NumberValue]', character.numberValue),
-        m('td[title=Uppercase]', String.fromCharCode(character.uppercaseCode)),
-        m('td[title=Lowercase]', String.fromCharCode(character.lowercaseCode)),
-        m('td[title=Titlecase]', String.fromCharCode(character.titlecaseCode)),
-      ]);
-    });
-
-    return m('main', [
-      m('div', select),
-      m('table.characters',
-        m('thead', [
-          m('th', 'dec'),
-          m('th', 'hex'),
-          m('th', 'oct'),
-          m('th', 'character'),
-          m('th', 'name'),
-          m('th', 'generalCategory'),
-          m('th', 'combiningClass'),
-          m('th[title=NumberValue]', '#'),
-          m('th[title=Uppercase]', 'UC'),
-          m('th[title=Lowercase]', 'LC'),
-          m('th[title=Titlecase]', 'TC'),
-        ]),
-        m('tbody', characters)
-      )
+/** Mithril doesn't change thisArg when calling view() */
+function characterTableView(ctrl: CharacterTableCtrl) {
+  var blocks = ctrl.blocks();
+  var select = m('select', {
+    onchange: function(ev) { ctrl.setBlock(blocks[this.selectedIndex]) }
+  }, blocks.map(block => m('option', `${block.blockName} ${block.startCode}-${block.endCode}`)));
+  var characters = ctrl.getSelectedCharacters().map(character => {
+    return m('tr', [
+      m('td', character.code),
+      m('td', character.code.toString(16)),
+      m('td', character.code.toString(8)),
+      m('td', String.fromCharCode(character.code)),
+      m('td', character.name),
+      m('td', GeneralCategory[character.generalCategory]),
+      m('td', character.combiningClass),
+      m('td[title=NumberValue]', character.numberValue),
+      m('td[title=Uppercase]', String.fromCharCode(character.uppercaseCode)),
+      m('td[title=Lowercase]', String.fromCharCode(character.lowercaseCode)),
+      m('td[title=Titlecase]', String.fromCharCode(character.titlecaseCode)),
     ]);
-  }
+  });
+
+  return m('main', [
+    m('div', select),
+    m('table.characters',
+      m('thead', [
+        m('th', 'dec'),
+        m('th', 'hex'),
+        m('th', 'oct'),
+        m('th', 'character'),
+        m('th', 'name'),
+        m('th', 'generalCategory'),
+        m('th', 'combiningClass'),
+        m('th[title=NumberValue]', '#'),
+        m('th[title=Uppercase]', 'UC'),
+        m('th[title=Lowercase]', 'LC'),
+        m('th[title=Titlecase]', 'TC'),
+      ]),
+      m('tbody', characters)
+    )
+  ]);
 }
 
 // string app
