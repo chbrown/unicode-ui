@@ -1,4 +1,5 @@
 /// <reference path="lib/mithril.d.ts" />
+/// <reference path="type_declarations/index.d.ts" />
 import * as mithril from 'mithril';
 
 interface Block {
@@ -252,4 +253,76 @@ class CharacterTableApp {
       )
     ]);
   }
+}
+
+// string app
+
+class StringCtrl {
+  public input: string = '';
+  constructor() {
+    var query = locationQuery();
+    this.input = query['input'];
+  }
+  setString(input: string) {
+    history.pushState(null, '', `?input=${input}`);
+    this.input = input;
+  }
+}
+
+function getCharCodes(str: string): number[] {
+  var charCodes = [];
+  for (var i = 0; i < str.length; i++) {
+    charCodes[i] = str.charCodeAt(i);
+  }
+  return charCodes;
+}
+
+function charCodesTable(charCodes: number[]) {
+  var indexCells = [];
+  var stringCells = [];
+  var decCells = [];
+  var hexCells = [];
+  var octCells = [];
+  for (var i = 0; i < charCodes.length; i++) {
+    var charCode = charCodes[i];
+    indexCells[i] = m('th', [i]);
+    stringCells[i] = m('td', [String.fromCharCode(charCodes[i])]);
+    decCells[i] = m('td', [charCode]);
+    hexCells[i] = m('td', ['0x' + charCode.toString(16).toUpperCase()]);
+    octCells[i] = m('td', ['\\' + charCode.toString(8)]);
+  }
+  return m('table.string', {style: 'margin: 20px 0'}, [
+    m('thead', [
+      m('tr', [m('th'), indexCells])
+    ]),
+    m('tbody', [
+      m('tr.str', [m('th', ['str']), stringCells]),
+      m('tr', [m('th', ['dec']), decCells]),
+      m('tr', [m('th', ['hex']), hexCells]),
+      m('tr', [m('th', ['oct']), octCells]),
+    ])
+  ]);
+}
+
+function stringMainView(ctrl: StringCtrl) {
+  var str = ctrl.input;
+  var charCodes = getCharCodes(str);
+
+  var normalizations = ['NFC', 'NFD', 'NFKC', 'NFKD'].map(form => {
+    var normalization_str = unorm[form.toLowerCase()](str);
+    var normalization_charCodes = getCharCodes(normalization_str);
+    return [
+      m('h2', [form]),
+      charCodesTable(normalization_charCodes)
+    ];
+  })
+
+  return m('main', [
+    m('div', [
+      m('input', { onkeyup: function(ev) { ctrl.setString(this.value); }, value: ctrl.input })
+    ]),
+    m('h2', ['original']),
+    charCodesTable(charCodes),
+    normalizations
+  ]);
 }
