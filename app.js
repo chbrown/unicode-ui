@@ -224,8 +224,16 @@ function parseUnicodeData(txt) {
     });
 }
 // Mithril app ...
-var Ctrl = (function () {
-    function Ctrl() {
+function locationQuery() {
+    var query = {};
+    window.location.search.slice(1).split('&').forEach(function (arg) {
+        var _a = arg.split('='), key = _a[0], value = _a[1];
+        query[key] = decodeURIComponent(value);
+    });
+    return query;
+}
+var CharacterTableCtrl = (function () {
+    function CharacterTableCtrl() {
         this.blocks = m.request({
             method: 'GET',
             url: 'ucd/Blocks.txt',
@@ -237,15 +245,11 @@ var Ctrl = (function () {
             deserialize: parseUnicodeData,
         });
     }
-    Ctrl.prototype.setBlock = function (block) {
+    CharacterTableCtrl.prototype.setBlock = function (block) {
         history.pushState(null, '', "?start=" + block.startCode + "&end=" + block.endCode);
     };
-    Ctrl.prototype.getSelectedCharacters = function () {
-        var query = {};
-        window.location.search.slice(1).split('&').forEach(function (arg) {
-            var _a = arg.split('='), key = _a[0], value = _a[1];
-            query[key] = value;
-        });
+    CharacterTableCtrl.prototype.getSelectedCharacters = function () {
+        var query = locationQuery();
         var selectionStartCode = parseInt(query['start'] || '0', 10);
         var selectionEndCode = parseInt(query['end'] || '255', 10);
         // search through all 27,268 characters
@@ -254,14 +258,13 @@ var Ctrl = (function () {
         });
         return [];
     };
-    return Ctrl;
+    return CharacterTableCtrl;
 })();
-var App = (function () {
-    function App() {
+var CharacterTableApp = (function () {
+    function CharacterTableApp() {
     }
     /** Mithril doesn't change thisArg when calling view() */
-    App.view = function (ctrl) {
-        // console.log('view(···)')
+    CharacterTableApp.view = function (ctrl) {
         var blocks = ctrl.blocks();
         var select = m('select', {
             onchange: function (ev) { ctrl.setBlock(blocks[this.selectedIndex]); }
@@ -302,6 +305,6 @@ var App = (function () {
     Mithril calls `new controller()`, which sets thisArg to the controller
     function itself, instead of the App instance.
     */
-    App.controller = Ctrl;
-    return App;
+    CharacterTableApp.controller = CharacterTableCtrl;
+    return CharacterTableApp;
 })();

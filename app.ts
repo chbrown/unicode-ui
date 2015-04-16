@@ -164,7 +164,16 @@ function parseUnicodeData(txt: string): Character[] {
 
 // Mithril app ...
 
-class Ctrl {
+function locationQuery(): {[index: string]: string} {
+  var query: {[index: string]: string} = {};
+  window.location.search.slice(1).split('&').forEach(arg => {
+    var [key, value] = arg.split('=');
+    query[key] = decodeURIComponent(value);
+  });
+  return query;
+}
+
+class CharacterTableCtrl {
   blocks: mithril.MithrilPromise<Block[]>;
   characters: mithril.MithrilPromise<Character[]>;
   constructor() {
@@ -183,11 +192,7 @@ class Ctrl {
     history.pushState(null, '', `?start=${block.startCode}&end=${block.endCode}`);
   }
   getSelectedCharacters(): Character[] {
-    var query = {};
-    window.location.search.slice(1).split('&').forEach(arg => {
-      var [key, value] = arg.split('=');
-      query[key] = value;
-    });
+    var query = locationQuery();
     var selectionStartCode = parseInt(query['start'] || '0', 10);
     var selectionEndCode = parseInt(query['end'] || '255', 10);
     // search through all 27,268 characters
@@ -198,16 +203,15 @@ class Ctrl {
   }
 }
 
-class App {
+class CharacterTableApp {
   /**
   Mithril calls `new controller()`, which sets thisArg to the controller
   function itself, instead of the App instance.
   */
-  static controller = Ctrl;
+  static controller = CharacterTableCtrl;
 
   /** Mithril doesn't change thisArg when calling view() */
-  static view(ctrl: Ctrl) {
-    // console.log('view(···)')
+  static view(ctrl: CharacterTableCtrl) {
     var blocks = ctrl.blocks();
     var select = m('select', {
       onchange: function(ev) { ctrl.setBlock(blocks[this.selectedIndex]) }
