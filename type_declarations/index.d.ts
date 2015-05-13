@@ -1,8 +1,6 @@
-interface _unorm {
-  nfd(str: string): string;
-  nfkd(str: string): string;
-  nfc(str: string): string;
-  nfkc(str: string): string;
-}
+/// <reference path="DefinitelyTyped/angularjs/angular.d.ts" />
+/// <reference path="DefinitelyTyped/angularjs/angular-resource.d.ts" />
+/// <reference path="DefinitelyTyped/unorm/unorm.d.ts" />
+/// <reference path="DefinitelyTyped/virtual-dom/virtual-dom.d.ts" />
 
-declare var unorm: _unorm;
+/// <reference path="../node_modules/unidata/unidata.d.ts" />
