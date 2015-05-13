@@ -1,7 +1,7 @@
 DTS = virtual-dom/virtual-dom unorm/unorm \
 	jquery/jquery angularjs/angular angularjs/angular-resource
 
-all: site.css build/bundle.js
+all: site.css build/unidata.js build/bundle.js
 
 # it seems Make doesn't count these as .PRECIOUS unless they're an actual target?
 type_declarations: $(DTS:%=type_declarations/DefinitelyTyped/%.d.ts)
@@ -19,9 +19,13 @@ type_declarations/DefinitelyTyped/%:
 	mkdir -p $(@D)
 	curl -s https://raw.githubusercontent.com/chbrown/DefinitelyTyped/master/$* > $@
 
+build/unidata.js: | node_modules/.bin/browserify
+	node_modules/.bin/browserify -r unidata -o $@
+
 build/bundle.js: app.js | node_modules/.bin/browserify
 	mkdir -p $(@D)
-	node_modules/.bin/browserify $< -o $@
+	# exclude unidata from bundle and include it separately
+	node_modules/.bin/browserify $< -u unidata -o $@
 
 dev: | node_modules/.bin/browserify node_modules/.bin/watchify
 	exec ./dev.sh
