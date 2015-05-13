@@ -140,7 +140,7 @@ app.controller('charactersCtrl', ($scope, $http, $q, $state) => {
       return after_start && before_end && name_matches && cat_matches;
     });
     $scope.totalMatchingCharacters = matchingCharacters.length;
-    $scope.limitedMatchingCharacters = matchingCharacters.slice(0, params.limit || 100)
+    $scope.limitedMatchingCharacters = matchingCharacters.slice(0, params.limit || 256)
   }
 
   $scope.$watch('params', (params: Params) => {
