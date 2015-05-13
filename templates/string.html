@@ -1,0 +1,11 @@
+<section class="hpad">
+  <label>
+    <div><b>Input string</b></div>
+    <input ng-model="input">
+  </label>
+</section>
+
+<section ng-repeat="normalization in normalizations" class="hpad">
+  <h3>{{normalization.form}}: {{normalization.string}}</h3>
+  <virtual value="normalization.charCodes" name="CharCodesTable"></virtual>
+</section>

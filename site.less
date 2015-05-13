@@ -1,31 +1,77 @@
 // --- general resets ---
-body { margin: 0; }
-h1, h2, h3, h4, h5, h6 { margin: 1ex 0; }
+body {
+  margin: 0;
+}
 table {
-  border-spacing: 0; border-collapse: collapse;
-  th, td { font-size: 100%; text-align: left; }
+  border-spacing: 0;
+  border-collapse: collapse;
+  th, td {
+    font-size: 100%;
+    text-align: left;
+  }
 }
 // ----------------------
 
+// --- generic compact ---
+h1, h2, h3, h4, h5, h6 {
+  margin: 1ex 0;
+}
+div, section, nav, main, textarea, input, span {
+  box-sizing: border-box;
+}
+section {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+.vpad {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+.hpad {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+// -----------------------
+
 body {
+  background-color: #FDFDFD;
   font: 16px Times;
 }
 
-div, section, nav, main, textarea, input, span {
-  box-sizing: border-box;
+nav[fixedflow] {
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: #444;
+  // border-bottom: 1px solid #BBB;
+  padding: 0 3px;
+
+  .tab {
+    display: inline-block;
+    // spacing / sizing:
+    padding: 1px 5px 2px;
+    margin: 3px 0 0 0;
+    border-radius: 3px 3px 0 0;
+    // coloring:
+    background-color: #BBB;
+    &:hover, &.current {
+      background-color: #FDFDFD;
+    }
+  }
+}
+
+.hcontrol {
+  display: inline-block;
+  padding: 10px;
+  vertical-align: top;
 }
 
 textarea, input, pre {
   font: 10px Monaco, "Courier New", monospace;
   padding: 2px;
   resize: none;
-}
-
-main {
-  margin: 10px
-}
-section {
-  margin: 10px;
 }
 
 table.characters {
@@ -36,7 +82,9 @@ table.characters {
     font: 14px "Lucida Sans Unicode", "Arial Unicode MS", Arial, sans-serif;
     line-height: 100%;
     &.str {
-      font-size: 20px;
+      padding-left: 8px;
+      padding-right: 8px;
+      font-size: 16px;
     }
     &.num {
       font-family: monospace;
@@ -44,17 +92,55 @@ table.characters {
     }
   }
 }
+
 table.string {
   tr.str {
     // text-align: center;
+  }
+  thead {
+    // indices
+    font-size: 75%;
   }
   th {
     text-align: center;
     padding: 2px 4px;
   }
   td {
+    min-width: 40px;
     font-family: monospace;
     padding: 2px 4px;
     border: 1px solid #CCC;
+  }
+  a {
+    color: #007;
+  }
+}
+
+table {
+  td {
+    vertical-align: top;
+  }
+
+  &.fill {
+    width: 100%;
+  }
+  &.padded tr {
+    td, th {
+      &:first-child { padding-left: 10px; }
+      &:last-child { padding-right: 10px; }
+    }
+  }
+  &.lined tbody {
+    td {
+      border-top: 1px solid #EEE;
+    }
+  }
+  &.striped tbody {
+    tr:nth-child(odd) {
+      background-color: #FCFCFC;
+    }
+    tr:nth-child(even) {
+      background-color: #FEFEFE;
+    }
   }
 }

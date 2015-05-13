@@ -7,15 +7,31 @@
   "repository": "git://github.com/chbrown/unicode-ui.git",
   "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
   "license": "MIT",
-  "staticPattern": "lib/{file}",
+  "dependencies": {
+    "virtual-dom": "*",
+    "unidata": "*",
+    "unorm": "*"
+  },
   "devDependencies": {
+    "browserify": "*",
+    "watchify": "*",
     "typescript": "*"
   },
+  "staticPattern": "build/{file}",
   "staticDependencies": {
+    "angular": {
+      "filter": [
+        "angular.js",
+        "angular.min.js",
+        "angular-resource.js",
+        "angular-resource.min.js"
+      ]
+    },
+    "angular-ui-router": "*",
     "misc-js": {
       "url": "git://github.com/chbrown/misc-js.git",
-      "filter": ["base64.js", "unicode.js"]
+      "filter": ["angular-plugins.js", "base64.js", "unicode.js"]
     },
-    "mithril": "*"
+    "ng-storage": "*"
   }
 }

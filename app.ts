@@ -1,293 +1,18 @@
-/// <reference path="lib/mithril.d.ts" />
 /// <reference path="type_declarations/index.d.ts" />
-import * as mithril from 'mithril';
+import * as unorm from 'unorm';
+import {VNode} from 'virtual-dom';
+import h = require('virtual-dom/h');
+import create = require('virtual-dom/create-element');
+import diff = require('virtual-dom/diff');
+import patch = require('virtual-dom/patch');
 
-interface Block {
-  blockName: string;
-  startCode: number;
-  endCode: number;
-}
+// import * as unidata from 'unidata';
+import unidata = require('unidata');
 
-/**
-1000000000000 is the biggest numeric value defined for any Unicode character
-(U+16B61 "PAHAWH HMONG NUMBER TRILLIONS"), so what we have to worry about are
-the fractions (which can have negative signs, though
-U+0F33 "TIBETAN DIGIT HALF ZERO" is the only one of those)
-*/
-function evaluateNumericValue(string: string): number {
-  if (string === undefined) return undefined;
-  if (string === null) return null;
-  if (string === '') return null;
-  var fraction_match = string.match(/(-?\d+)\/(\d+)/);
-  if (fraction_match) {
-    var [_, numerator, denominator] = fraction_match;
-    return parseInt(numerator, 10) / parseInt(denominator, 10);
-  }
-  return parseInt(string, 10);
-}
+const log = console.log.bind(console);
 
-enum GeneralCategory {Uppercase_Letter, Lowercase_Letter, Titlecase_Letter, Cased_Letter, Modifier_Letter, Other_Letter, Letter, Nonspacing_Mark, Spacing_Mark, Enclosing_Mark, Mark, Decimal_Number, Letter_Number, Other_Number, Number, Connector_Punctuation, Dash_Punctuation, Open_Punctuation, Close_Punctuation, Initial_Punctuation, Final_Punctuation, Other_Punctuation, Punctuation, Math_Symbol, Currency_Symbol, Modifier_Symbol, Other_Symbol, Symbol, Space_Separator, Line_Separator, Paragraph_Separator, Separator, Control, Format, Surrogate, Private_Use, Unassigned, Other};
-enum GeneralCategoryAbbr {Lu, Ll, Lt, LC, Lm, Lo, L, Mn, Mc, Me, M, Nd, Nl, No, N, Pc, Pd, Ps, Pe, Pi, Pf, Po, P, Sm, Sc, Sk, So, S, Zs, Zl, Zp, Z, Cc, Cf, Cs, Co, Cn, C};
-
-enum CanonicalCombiningClass {
-  Not_Reordered = 0,
-  Overlay = 1,
-  Nukta = 7,
-  Kana_Voicing = 8,
-  Virama = 9,
-  Ccc10 = 10,
-  // Ccc[11..199] = [11..199], // Fixed position classes
-  Attached_Below_Left = 200,
-  Attached_Below = 202,
-  Marks_attached_at_the_bottom_right = 204,
-  Marks_attached_to_the_left = 208,
-  Marks_attached_to_the_right = 210,
-  Marks_attached_at_the_top_left = 212,
-  Attached_Above = 214,
-  Attached_Above_Right = 216,
-  Below_Left = 218,
-  Below = 220,
-  Below_Right = 222,
-  Left = 224,
-  Right = 226,
-  Above_Left = 228,
-  Above = 230,
-  Above_Right = 232,
-  Double_Below = 233,
-  Double_Above = 234,
-  Iota_Subscript = 240
-};
-
-/**
-Snippet from `Blocks.txt`:
-
-    0000..007F; Basic Latin
-    0080..00FF; Latin-1 Supplement
-    0100..017F; Latin Extended-A
-    0180..024F; Latin Extended-B
-    0250..02AF; IPA Extensions
-
-*/
-function parseBlocks(txt: string): Block[] {
-  return txt
-    .split(/\n/)
-    .map(line => line.match(/^([A-F0-9]+)\.\.([A-F0-9]+); (.+)$/))
-    .filter(match => match !== null)
-    .map(match => {
-      // var [_, startCode: string, endCode: string, blockName] = match; // doesn't work
-      var [_, startCode, endCode, blockName] = match;
-      return {
-        blockName: blockName,
-        startCode: parseInt(startCode, 16),
-        endCode: parseInt(endCode, 16),
-      };
-    });
-}
-
-interface Character {
-  code: number;
-  name: string;
-  generalCategory: GeneralCategory;
-  combiningClass: CanonicalCombiningClass;
-  numberValue: number,
-  uppercaseCode: number;
-  lowercaseCode: number;
-  titlecaseCode: number;
-}
-
-/**
-
-Snippet from `UnicodeData.txt`:
-
-    00A0;NO-BREAK SPACE;Zs;0;CS;<noBreak> 0020;;;;N;NON-BREAKING SPACE;;;;
-    00A1;INVERTED EXCLAMATION MARK;Po;0;ON;;;;;N;;;;;
-    00A2;CENT SIGN;Sc;0;ET;;;;;N;;;;;
-    00A3;POUND SIGN;Sc;0;ET;;;;;N;;;;;
-    00A4;CURRENCY SIGN;Sc;0;ET;;;;;N;;;;;
-    00A5;YEN SIGN;Sc;0;ET;;;;;N;;;;;
-    00A6;BROKEN BAR;So;0;ON;;;;;N;BROKEN VERTICAL BAR;;;;
-
-There are 14 ;'s per line, and so there are 15 fields per UnicodeDatum:
-
-0.  Code
-1.  Name
-2.  General_Category
-3.  Canonical_Combining_Class
-4.  Bidi_Class
-5.  <Decomposition_Type> Decomposition_Mapping
-6.  Numeric Value if decimal
-7.  Numeric Value if only digit
-8.  Numeric Value otherwise
-9.  Bidi_Mirrored
-10. Unicode_1_Name
-11. ISO_Comment
-12. Simple_Uppercase_Mapping
-13. Simple_Lowercase_Mapping
-14. Simple_Titlecase_Mapping
-
-*/
-function parseUnicodeData(txt: string): Character[] {
-  return txt
-    .split(/\n/)
-    .filter(line => line !== '')
-    .map(line => {
-      var fields = line.split(';');
-      // Code is hexadecimal
-      var code = parseInt(fields[0], 16);
-      // Name is a string
-      var name = fields[1];
-      // General_Category is an abbreviation, which we convert to a category name
-      var generalCategoryIndex: number = GeneralCategoryAbbr[fields[2]];
-      var generalCategory = <GeneralCategory>generalCategoryIndex;
-      // Canonical_Combining_Class
-      var combiningClass = CanonicalCombiningClass[fields[3]];
-      // fields[4]; // Bidi_Class
-      // fields[5]; // Decomposition Type & Value
-      var numberValue = evaluateNumericValue(fields[8]);
-      // fields[9]; // Bidi_Mirrored
-      // fields[10]; // Unicode_1_Name (obsolete)
-      // fields[11]; // ISO_Comment (obsolete)
-      var uppercaseCode = fields[12] && parseInt(fields[12], 16);
-      var lowercaseCode = fields[13] && parseInt(fields[13], 16);
-      var titlecaseCode = fields[14] && parseInt(fields[14], 16);
-
-      return {
-        code: code,
-        name: name,
-        generalCategory: generalCategory,
-        combiningClass: combiningClass,
-        numberValue: numberValue,
-        uppercaseCode: uppercaseCode,
-        lowercaseCode: lowercaseCode,
-        titlecaseCode: titlecaseCode,
-      };
-    });
-}
-
-// Mithril app ...
-
-function locationQuery(): {[index: string]: string} {
-  var query: {[index: string]: string} = {};
-  window.location.search.slice(1).split('&').forEach(arg => {
-    var [key, value] = arg.split('=');
-    query[key] = decodeURIComponent(value);
-  });
-  return query;
-}
-
-/**
-Mithril calls `new controller()`, which sets thisArg to the controller
-function itself, instead of the App instance.
-*/
-class CharacterTableCtrl {
-  blocks: mithril.MithrilPromise<Block[]>;
-  characters: mithril.MithrilPromise<Character[]>;
-  constructor() {
-    this.blocks = m.request<Block[]>({
-      method: 'GET',
-      url: 'ucd/Blocks.txt',
-      deserialize: parseBlocks,
-    });
-    this.characters = m.request<Character[]>({
-      method: 'GET',
-      url: 'ucd/UnicodeData.txt',
-      deserialize: parseUnicodeData,
-    });
-  }
-  setStartEnd(start: number, end: number) {
-    history.pushState(null, '', `?start=${start}&end=${end}`);
-  }
-  setName(name: string) {
-    history.pushState(null, '', `?name=${name}`);
-  }
-  getSelectedCharacters(): Character[] {
-    var query = locationQuery();
-    if (query['name'] && query['name'].length > 0) {
-      // limit to 200
-      var name = query['name'].toUpperCase();
-      return this.characters().filter(character => {
-        return character.name.indexOf(name) > -1;
-      }).slice(0, 200);
-    }
-    // otherwise use the ?start= &end= values
-    var selectionStartCode = parseInt(query['start'] || '0', 10);
-    var selectionEndCode = parseInt(query['end'] || '255', 10);
-    // search through all 27,268 characters
-    return this.characters().filter(character => {
-      return (character.code >= selectionStartCode) && (character.code <= selectionEndCode);
-    });
-  }
-}
-
-function ucdTable(characters: Character[]) {
-  var rows = characters.map(character => {
-    return m('tr', [
-      m('td.num', character.code),
-      m('td.num', character.code.toString(16).toUpperCase()),
-      m('td.num', character.code.toString(8)),
-      m('td.str', String.fromCharCode(character.code)),
-      m('td', character.name),
-      m('td', GeneralCategory[character.generalCategory]),
-      m('td', character.combiningClass),
-      m('td[title=NumberValue]', character.numberValue),
-      m('td[title=Uppercase]', String.fromCharCode(character.uppercaseCode)),
-      m('td[title=Lowercase]', String.fromCharCode(character.lowercaseCode)),
-      m('td[title=Titlecase]', String.fromCharCode(character.titlecaseCode)),
-    ]);
-  });
-
-  return m('table.characters', [
-    m('thead', [
-      m('th', 'dec'),
-      m('th', 'hex'),
-      m('th', 'oct'),
-      m('th', 'character'),
-      m('th', 'name'),
-      m('th', 'generalCategory'),
-      m('th', 'combiningClass'),
-      m('th[title=NumberValue]', '#'),
-      m('th[title=Uppercase]', 'UC'),
-      m('th[title=Lowercase]', 'LC'),
-      m('th[title=Titlecase]', 'TC'),
-    ]),
-    m('tbody', rows)
-  ]);
-}
-
-/** Mithril doesn't change thisArg when calling view() */
-function characterTableView(ctrl: CharacterTableCtrl) {
-  var blocks = ctrl.blocks();
-  var options = blocks.map(block => m('option', `${block.blockName} ${block.startCode}-${block.endCode}`));
-  var select = m('select', {
-    onchange: function(ev) {
-      var block = blocks[this.selectedIndex];
-      ctrl.setStartEnd(block.startCode, block.endCode);
-    }
-  }, options);
-
-  return m('main', [
-    m('div', select),
-    m('div', [
-      m('input', {
-        onkeyup: function(ev) { ctrl.setName(this.value); }
-      })
-    ]),
-    ucdTable(ctrl.getSelectedCharacters()),
-  ]);
-}
-
-// string app
-
-class StringCtrl {
-  public input: string = '';
-  constructor() {
-    var query = locationQuery();
-    this.input = query['input'];
-  }
-  setString(input: string) {
-    history.pushState(null, '', `?input=${input}`);
-    this.input = input;
-  }
+function isEmpty(val: any): boolean {
+  return (val === undefined) || (val === null) || (val === '');
 }
 
 function getCharCodes(str: string): number[] {
@@ -298,7 +23,331 @@ function getCharCodes(str: string): number[] {
   return charCodes;
 }
 
-function charCodesTable(charCodes: number[]) {
+var app = angular.module('app', [
+  'ui.router',
+  'ngStorage',
+  'misc-js/angular-plugins',
+]);
+
+function clean(object) {
+  if (object === null || object === undefined) {
+    return object;
+  }
+  if (typeof object.toJSON === 'function') {
+    return object.toJSON();
+  }
+  return angular.copy(object);
+}
+
+app.config(($stateProvider, $urlRouterProvider) => {
+  $urlRouterProvider.otherwise(($injector, $location) => {
+    log('otherwise: coming from "%s"', $location.url());
+    return '/characters?start=32&end=255&limit=200';
+  });
+
+  $stateProvider
+  .state('characters', {
+    url: '/characters?{start:int}&{end:int}&name&cat&{limit:int}',
+    templateUrl: 'templates/characters.html',
+    controller: 'charactersCtrl',
+  })
+  .state('string', {
+    url: '/string?input',
+    templateUrl: 'templates/string.html',
+    controller: 'stringCtrl',
+  });
+});
+
+app.directive('virtual', () => {
+  return {
+    restrict: 'E',
+    scope: {
+      value: '=',
+      name: '@',
+    },
+    link: (scope, el) => {
+      var element: Element;
+      var vtree: VNode;
+      var renderFunction: (value: any) => VNode;
+      if (scope['name'] == 'UcdTable') {
+        renderFunction = renderUcdTable;
+      }
+      else if (scope['name'] == 'CharCodesTable') {
+        renderFunction = renderCharCodesTable;
+      }
+      else {
+        throw new Error(`Cannot find render function: "${scope['name']}"`);
+      }
+
+      function update(value) {
+        if (vtree === undefined) {
+          vtree = renderFunction(value);
+          element = create(vtree)
+          // attach to the dom on the first draw
+          el[0].appendChild(element);
+        }
+        else {
+          var new_vtree = renderFunction(value);
+          var patches = diff(vtree, new_vtree)
+          element = patch(element, patches)
+          vtree = new_vtree;
+        }
+      }
+
+      scope.$watch('value', (value) => {
+        if (value) {
+          update(clean(value));
+        }
+      }, true);
+    }
+  };
+});
+
+interface Params {
+  start: number;
+  end: number;
+  name: string;
+  cat: string;
+  limit: number;
+}
+
+const characters: unidata.Character[] = unidata.getCharacters();
+const blocks: unidata.Block[] = unidata.getBlocks();
+
+app.controller('charactersCtrl', ($scope, $http, $q, $state) => {
+  var params: Params = $scope.params = angular.copy($state.params);
+
+  $scope.GeneralCategories = GeneralCategories;
+  $scope.blocks = blocks;
+
+  var selectedBlocks = blocks.filter(block => block.startCode == params.start && block.endCode == params.end);
+  if (selectedBlocks.length == 1) {
+    $scope.selectedBlock = selectedBlocks[0];
+  }
+
+  var refresh = $scope.refresh = () => {
+    log('refresh params', params);
+    // search through all 27,268 characters
+    var ignore_start = typeof params.start !== 'number';
+    var ignore_end = typeof params.end !== 'number';
+    var ignore_name = isEmpty(params.name);
+    var ignore_cat = isEmpty(params.cat);
+    var matchingCharacters = characters.filter(character => {
+      var after_start = ignore_start || (character.code >= params.start);
+      var before_end = ignore_end || (character.code <= params.end);
+      var name_matches = ignore_name || (character.name.indexOf(params.name) > -1);
+      var cat_matches = ignore_cat || ((character.cat || 'L') === params.cat);
+      return after_start && before_end && name_matches && cat_matches;
+    });
+    $scope.totalMatchingCharacters = matchingCharacters.length;
+    $scope.limitedMatchingCharacters = matchingCharacters.slice(0, params.limit || 100)
+  }
+
+  $scope.$watch('params', (params: Params) => {
+    log('params changed', params);
+    $state.go('.', params, {notify: false});
+    refresh();
+  }, true);
+});
+
+/**
+From pdfi
+*/
+
+/**
+modifiers modify the character after them.
+combiners modify the character before them.
+*/
+var modifier_to_combiner = {
+  "\u02C7": "\u030C", // CARON -> COMBINING CARON
+  "\u02DB": "\u0328", // OGONEK -> COMBINING OGONEK
+  "\u02CA": "\u0301", // MODIFIER LETTER ACUTE ACCENT -> COMBINING ACUTE ACCENT
+  "\u02CB": "\u0300", // MODIFIER LETTER GRAVE ACCENT -> COMBINING GRAVE ACCENT
+  "\u02C6": "\u0302", // MODIFIER LETTER CIRCUMFLEX ACCENT -> COMBINING CIRCUMFLEX ACCENT
+};
+/**
+These are all the Modifier_Symbol with character codes less than 1000 that have
+decompositions. I think these are the ones that we can assume are supposed to
+combine with the following character.
+
+The unicode names in the comment after each mapping pair are the key's name.
+*/
+var decomposable_modifiers = {
+  '\u00A8': '\u0308', // DIAERESIS
+  '\u00AF': '\u0304', // MACRON
+  '\u00B4': '\u0301', // ACUTE ACCENT
+  '\u00B8': '\u0327', // CEDILLA
+  '\u02D8': '\u0306', // BREVE -> COMBINING BREVE
+  '\u02D9': '\u0307', // DOT ABOVE
+  '\u02DA': '\u030A', // RING ABOVE
+  '\u02DB': '\u0328', // OGONEK
+  '\u02DC': '\u0303', // SMALL TILDE
+  '\u02DD': '\u030B', // DOUBLE ACUTE ACCENT -> COMBINING DOUBLE ACUTE ACCENT
+};
+export function normalize(raw: string): string {
+  // remove all character codes 0 through 31 (space is 32 == 0x1F)
+  var visible = raw.replace(/[\x00-\x1F]/g, '');
+  // 2. replace combining characters that are currently combining with a space
+  // by the lone combiner so that they'll combine with the following character
+  // instead, as intended.
+  var decompositions_applied = visible.replace(/[\u00A8\u00AF\u00B4\u00B8\u02D8-\u02DD]/g, (modifier) => {
+    log('Success! replacing "%s" with "%s"', modifier, decomposable_modifiers[modifier]);
+    return decomposable_modifiers[modifier];
+  });
+  // 1. replace (modifier, letter) pairs with a single modified-letter character
+  //    688 - 767
+  var modifiers_applied = decompositions_applied.replace(/([\u02B0-\u02FF])(.)/g, (m0, modifier, modified) => {
+    if (modifier in modifier_to_combiner) {
+      return modified + modifier_to_combiner[modifier];
+    }
+    return modifier + modified;
+  });
+
+  // and replacing the combining character pairs with precombined characters where possible
+  // var canonical = unorm.nfc(normalized);
+  return modifiers_applied;
+}
+
+function applyNormalization(form: string, input: string): string {
+  if (form == 'Original') {
+    return input;
+  }
+  else if (form == 'Custom') {
+    return normalize(input);
+  }
+  else {
+    return unorm[form.toLowerCase()](input);
+  }
+}
+
+app.controller('stringCtrl', ($scope, $http, $state) => {
+  var normalizations = ['Original', 'Custom', 'NFC', 'NFD', 'NFKC', 'NFKD'];
+  $scope.input = $state.params.input || '';
+
+  $scope.$watch('input', input => {
+    $state.go('.', {input: input}, {notify: false});
+
+    $scope.normalizations = normalizations.map(form => {
+      var normalized = applyNormalization(form, input);
+      return {
+        form: form,
+        string: normalized,
+        charCodes: getCharCodes(normalized),
+      };
+    });
+  })
+});
+
+var GeneralCategories = {
+  "Lu": "Uppercase_Letter",
+  "Ll": "Lowercase_Letter",
+  "Lt": "Titlecase_Letter",
+  "LC": "Cased_Letter",
+  "Lm": "Modifier_Letter",
+  "Lo": "Other_Letter",
+  "L": "Letter",
+  "Mn": "Nonspacing_Mark",
+  "Mc": "Spacing_Mark",
+  "Me": "Enclosing_Mark",
+  "M": "Mark",
+  "Nd": "Decimal_Number",
+  "Nl": "Letter_Number",
+  "No": "Other_Number",
+  "N": "Number",
+  "Pc": "Connector_Punctuation",
+  "Pd": "Dash_Punctuation",
+  "Ps": "Open_Punctuation",
+  "Pe": "Close_Punctuation",
+  "Pi": "Initial_Punctuation",
+  "Pf": "Final_Punctuation",
+  "Po": "Other_Punctuation",
+  "P": "Punctuation",
+  "Sm": "Math_Symbol",
+  "Sc": "Currency_Symbol",
+  "Sk": "Modifier_Symbol",
+  "So": "Other_Symbol",
+  "S": "Symbol",
+  "Zs": "Space_Separator",
+  "Zl": "Line_Separator",
+  "Zp": "Paragraph_Separator",
+  "Z": "Separator",
+  "Cc": "Control",
+  "Cf": "Format",
+  "Cs": "Surrogate",
+  "Co": "Private_Use",
+  "Cn": "Unassigned",
+  "C": "Other"
+};
+
+var CombiningClass = {
+  0: "Not_Reordered",
+  1: "Overlay",
+  7: "Nukta",
+  8: "Kana_Voicing",
+  9: "Virama",
+  10: "Ccc10",
+  // C"cc[11..199] = [11..199], // Fixed position classe"s
+  200: "Attached_Below_Left",
+  202: "Attached_Below",
+  204: "Marks_attached_at_the_bottom_right",
+  208: "Marks_attached_to_the_left",
+  210: "Marks_attached_to_the_right",
+  212: "Marks_attached_at_the_top_left",
+  214: "Attached_Above",
+  216: "Attached_Above_Right",
+  218: "Below_Left",
+  220: "Below",
+  222: "Below_Right",
+  224: "Left",
+  226: "Right",
+  228: "Above_Left",
+  230: "Above",
+  232: "Above_Right",
+  233: "Double_Below",
+  234: "Double_Above",
+  240: "Iota_Subscript",
+};
+
+function renderUcdTable(characters: unidata.Character[]): VNode {
+  var rows = characters.map(character => {
+    return h('tr', [
+      h('td.num', character.code.toString()),
+      h('td.num', character.code.toString(16).toUpperCase()),
+      h('td.num', character.code.toString(8)),
+      h('td.str', String.fromCharCode(character.code)),
+      h('td', character.name),
+      h('td', GeneralCategories[character.cat]),
+      h('td', CombiningClass[character.comb]),
+      h('td', [character.decompType, ' ', (character.decomp || []).map(code => '0x' + code.toString(16)).join(' ')]),
+      h('td[title=NumberValue]', character.num),
+      h('td[title=Uppercase]', String.fromCharCode(character.upper)),
+      h('td[title=Lowercase]', String.fromCharCode(character.lower)),
+      h('td[title=Titlecase]', String.fromCharCode(character.title)),
+    ]);
+  });
+
+  return h('table.characters.fill.padded.lined.striped', [
+    h('thead', [
+      h('tr', [
+        h('th', 'dec'),
+        h('th', 'hex'),
+        h('th', 'oct'),
+        h('th', 'Character'),
+        h('th', 'Name'),
+        h('th', 'GeneralCategory'),
+        h('th', 'CombiningClass'),
+        h('th', 'Decomposition'),
+        h('th[title=NumberValue]', '#'),
+        h('th[title=Uppercase]', 'UC'),
+        h('th[title=Lowercase]', 'LC'),
+        h('th[title=Titlecase]', 'TC'),
+      ])
+    ]),
+    h('tbody', rows)
+  ]);
+}
+
+function renderCharCodesTable(charCodes: number[]): VNode {
   var indexCells = [];
   var stringCells = [];
   var decCells = [];
@@ -306,44 +355,22 @@ function charCodesTable(charCodes: number[]) {
   var octCells = [];
   for (var i = 0; i < charCodes.length; i++) {
     var charCode = charCodes[i];
-    indexCells[i] = m('th', [i]);
-    stringCells[i] = m('td', [String.fromCharCode(charCodes[i])]);
-    decCells[i] = m('td', [charCode]);
-    hexCells[i] = m('td', ['0x' + charCode.toString(16).toUpperCase()]);
-    octCells[i] = m('td', ['\\' + charCode.toString(8)]);
+    var url = `#/characters?start=${charCode}&end=${charCode}`;
+    indexCells[i] = h('th', i.toString());
+    stringCells[i] = h('td', String.fromCharCode(charCodes[i]));
+    decCells[i] = h('td', h('a', {href: url}, charCode.toString()));
+    hexCells[i] = h('td', h('a', {href: url}, '0x' + charCode.toString(16).toUpperCase()));
+    octCells[i] = h('td', h('a', {href: url}, '\\' + charCode.toString(8)));
   }
-  return m('table.string', {style: 'margin: 20px 0'}, [
-    m('thead', [
-      m('tr', [m('th'), indexCells])
+  return h('table.string', [
+    h('thead', [
+      h('tr', [h('th', ''), indexCells])
     ]),
-    m('tbody', [
-      m('tr.str', [m('th', ['str']), stringCells]),
-      m('tr', [m('th', ['dec']), decCells]),
-      m('tr', [m('th', ['hex']), hexCells]),
-      m('tr', [m('th', ['oct']), octCells]),
+    h('tbody', [
+      h('tr.str', [h('th', 'str'), stringCells]),
+      h('tr', [h('th', 'dec'), decCells]),
+      h('tr', [h('th', 'hex'), hexCells]),
+      h('tr', [h('th', 'oct'), octCells]),
     ])
-  ]);
-}
-
-function stringMainView(ctrl: StringCtrl) {
-  var str = ctrl.input;
-  var charCodes = getCharCodes(str);
-
-  var normalizations = ['NFC', 'NFD', 'NFKC', 'NFKD'].map(form => {
-    var normalization_str = unorm[form.toLowerCase()](str);
-    var normalization_charCodes = getCharCodes(normalization_str);
-    return [
-      m('h2', [form]),
-      charCodesTable(normalization_charCodes)
-    ];
-  })
-
-  return m('main', [
-    m('div', [
-      m('input', { onkeyup: function(ev) { ctrl.setString(this.value); }, value: ctrl.input })
-    ]),
-    m('h2', ['original']),
-    charCodesTable(charCodes),
-    normalizations
   ]);
 }
