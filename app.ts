@@ -348,11 +348,11 @@ function renderUcdTable(characters: unidata.Character[]): VNode {
 }
 
 function renderCharCodesTable(charCodes: number[]): VNode {
-  var indexCells = [];
-  var stringCells = [];
-  var decCells = [];
-  var hexCells = [];
-  var octCells = [];
+  var indexCells = [h('th', '')];
+  var stringCells = [h('th', 'str')];
+  var decCells = [h('th', 'dec')];
+  var hexCells = [h('th', 'hex')];
+  var octCells = [h('th', 'oct')];
   for (var i = 0; i < charCodes.length; i++) {
     var charCode = charCodes[i];
     var url = `#/characters?start=${charCode}&end=${charCode}`;
@@ -364,13 +364,13 @@ function renderCharCodesTable(charCodes: number[]): VNode {
   }
   return h('table.string', [
     h('thead', [
-      h('tr', [h('th', ''), indexCells])
+      h('tr', indexCells)
     ]),
     h('tbody', [
-      h('tr.str', [h('th', 'str'), stringCells]),
-      h('tr', [h('th', 'dec'), decCells]),
-      h('tr', [h('th', 'hex'), hexCells]),
-      h('tr', [h('th', 'oct'), octCells]),
+      h('tr.str', stringCells),
+      h('tr', decCells),
+      h('tr', hexCells),
+      h('tr', octCells),
     ])
   ]);
 }
