@@ -1,8 +1,14 @@
 {
   "name": "unicode-ui",
   "description": "Unicode character data viewer and reference",
-  "keywords" : ["unicode", "character", "utf", "user", "interface"],
-  "version": "0.0.1",
+  "keywords": [
+    "unicode",
+    "character",
+    "utf",
+    "user",
+    "interface"
+  ],
+  "version": "0.1.0",
   "homepage": "https://github.com/chbrown/unicode-ui",
   "repository": "git://github.com/chbrown/unicode-ui.git",
   "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
@@ -30,7 +36,11 @@
     "angular-ui-router": "*",
     "misc-js": {
       "url": "git://github.com/chbrown/misc-js.git",
-      "filter": ["angular-plugins.js", "base64.js", "unicode.js"]
+      "filter": [
+        "angular-plugins.js",
+        "base64.js",
+        "unicode.js"
+      ]
     },
     "ng-storage": "*"
   }
