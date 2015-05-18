@@ -29,5 +29,5 @@ build/bundle.js: app.js | node_modules/.bin/browserify
 
 dev: | node_modules/.bin/browserify node_modules/.bin/watchify
 	(node_modules/.bin/tsc -m commonjs -t ES5 -w *.ts & \
-   node_modules/.bin/watchify app.js -o build/bundle.js -v & \
+   node_modules/.bin/watchify -u unidata app.js -o build/bundle.js -v & \
    wait)
