@@ -28,4 +28,6 @@ build/bundle.js: app.js | node_modules/.bin/browserify
 	node_modules/.bin/browserify $< -u unidata -o $@
 
 dev: | node_modules/.bin/browserify node_modules/.bin/watchify
-	exec ./dev.sh
+	(node_modules/.bin/tsc -m commonjs -t ES5 -w *.ts & \
+   node_modules/.bin/watchify app.js -o build/bundle.js -v & \
+   wait)
