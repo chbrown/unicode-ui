@@ -322,9 +322,9 @@ function renderCharCodesTable(charCodes) {
         var url = "#/characters?start=" + charCode + "&end=" + charCode;
         indexCells[i] = h('th', i.toString());
         stringCells[i] = h('td', String.fromCharCode(charCodes[i]));
-        decCells[i] = h('td', h('a', { href: url }, charCode.toString()));
-        hexCells[i] = h('td', h('a', { href: url }, '0x' + charCode.toString(16).toUpperCase()));
-        octCells[i] = h('td', h('a', { href: url }, '\\' + charCode.toString(8)));
+        decCells[i] = h('td', [h('a', { href: url }, [charCode.toString()])]);
+        hexCells[i] = h('td', [h('a', { href: url }, ['0x' + charCode.toString(16).toUpperCase()])]);
+        octCells[i] = h('td', [h('a', { href: url }, ['\\' + charCode.toString(8)])]);
     }
     return h('table.string', [
         h('thead', [
