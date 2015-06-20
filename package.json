@@ -1,7 +1,7 @@
 {
   "name": "unicode-ui",
   "description": "Unicode character data viewer and reference",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "keywords": [
     "unicode",
     "character",
@@ -44,5 +44,6 @@
       ]
     },
     "ng-storage": "*"
-  }
+  },
+  "scripts": {}
 }
