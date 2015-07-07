@@ -6,8 +6,12 @@ import create = require('virtual-dom/create-element');
 import diff = require('virtual-dom/diff');
 import patch = require('virtual-dom/patch');
 
-// import * as unidata from 'unidata';
-import unidata = require('unidata');
+import * as unidata from 'unidata';
+
+import angular = require('angular');
+import 'angular-ui-router';
+import 'ngstorage';
+import 'flow-copy';
 
 const log = console.log.bind(console);
 
@@ -26,7 +30,7 @@ function getCharCodes(str: string): number[] {
 var app = angular.module('app', [
   'ui.router',
   'ngStorage',
-  'misc-js/angular-plugins',
+  'flow-copy',
 ]);
 
 function clean(object) {
@@ -41,7 +45,6 @@ function clean(object) {
 
 app.config(($stateProvider, $urlRouterProvider) => {
   $urlRouterProvider.otherwise(($injector, $location) => {
-    log('otherwise: coming from "%s"', $location.url());
     return '/characters?start=32&end=255&limit=200';
   });
 
@@ -126,7 +129,6 @@ app.controller('charactersCtrl', ($scope, $http, $q, $state) => {
   }
 
   var refresh = $scope.refresh = () => {
-    log('refresh params', params);
     // search through all 27,268 characters
     var ignore_start = typeof params.start !== 'number';
     var ignore_end = typeof params.end !== 'number';
@@ -144,7 +146,6 @@ app.controller('charactersCtrl', ($scope, $http, $q, $state) => {
   }
 
   $scope.$watch('params', (params: Params) => {
-    log('params changed', params);
     $state.go('.', params, {notify: false});
     refresh();
   }, true);
@@ -191,7 +192,6 @@ export function normalize(raw: string): string {
   // by the lone combiner so that they'll combine with the following character
   // instead, as intended.
   var decompositions_applied = visible.replace(/[\u00A8\u00AF\u00B4\u00B8\u02D8-\u02DD]/g, (modifier) => {
-    log('Success! replacing "%s" with "%s"', modifier, decomposable_modifiers[modifier]);
     return decomposable_modifiers[modifier];
   });
   // 1. replace (modifier, letter) pairs with a single modified-letter character

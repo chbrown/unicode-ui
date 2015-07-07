@@ -15,35 +15,18 @@
   "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
   "license": "MIT",
   "dependencies": {
+    "angular": "*",
+    "angular-ui-router": "*",
+    "flow-copy": "*",
+    "ngstorage": "gsklee/ngStorage",
     "virtual-dom": "*",
     "unidata": "*",
     "unorm": "*"
   },
   "devDependencies": {
     "browserify": "*",
-    "typescript": "*",
+    "browserify-ngannotate": "*",
+    "typescript": "latest",
     "watchify": "*"
-  },
-  "staticPattern": "build/{file}",
-  "staticDependencies": {
-    "angular": {
-      "filter": [
-        "angular.js",
-        "angular.min.js",
-        "angular-resource.js",
-        "angular-resource.min.js"
-      ]
-    },
-    "angular-ui-router": "*",
-    "misc-js": {
-      "url": "git://github.com/chbrown/misc-js.git",
-      "filter": [
-        "angular-plugins.js",
-        "base64.js",
-        "unicode.js"
-      ]
-    },
-    "ng-storage": "*"
-  },
-  "scripts": {}
+  }
 }

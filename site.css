@@ -7,7 +7,7 @@ section{margin-top:5px;margin-bottom:5px;padding-top:5px;padding-bottom:5px}
 .vpad{padding-top:10px;padding-bottom:10px}
 .hpad{padding-left:10px;padding-right:10px}
 body{background-color:#FDFDFD;font:16px Times}
-nav[fixedflow]{left:0;right:0;z-index:1000;background-color:#444;padding:0 3px}
+nav[fixedflow]{position:fixed;left:0;right:0;z-index:1000;background-color:#444;padding:0 3px}
 nav[fixedflow] .tab{display:inline-block;padding:1px 5px 2px;margin:3px 0 0 0;border-radius:3px 3px 0 0;background-color:#BBB}
 nav[fixedflow] .tab.current,nav[fixedflow] .tab:hover{background-color:#FDFDFD}
 .hcontrol{display:inline-block;padding:10px;vertical-align:top}
