@@ -35,9 +35,9 @@ function clean(object) {
     }
     return angular.copy(object);
 }
-app.config(function ($stateProvider, $urlRouterProvider) {
+app.config(["$stateProvider", "$urlRouterProvider", function ($stateProvider, $urlRouterProvider) {
     $urlRouterProvider.otherwise(function ($injector, $location) {
-        return '/characters?start=32&end=255&limit=200';
+        return '/characters?start=32';
     });
     $stateProvider
         .state('characters', {
@@ -50,7 +50,7 @@ app.config(function ($stateProvider, $urlRouterProvider) {
         templateUrl: 'templates/string.html',
         controller: 'stringCtrl',
     });
-});
+}]);
 app.directive('virtual', function () {
     return {
         restrict: 'E',
@@ -95,7 +95,7 @@ app.directive('virtual', function () {
 });
 var characters = unidata.getCharacters();
 var blocks = unidata.getBlocks();
-app.controller('charactersCtrl', function ($scope, $http, $q, $state) {
+app.controller('charactersCtrl', ["$scope", "$http", "$q", "$state", function ($scope, $http, $q, $state) {
     var params = $scope.params = angular.copy($state.params);
     $scope.GeneralCategories = GeneralCategories;
     $scope.blocks = blocks;
@@ -123,7 +123,7 @@ app.controller('charactersCtrl', function ($scope, $http, $q, $state) {
         $state.go('.', params, { notify: false });
         refresh();
     }, true);
-});
+}]);
 /**
 From pdfi
 */
@@ -190,7 +190,7 @@ function applyNormalization(form, input) {
         return unorm[form.toLowerCase()](input);
     }
 }
-app.controller('stringCtrl', function ($scope, $http, $state) {
+app.controller('stringCtrl', ["$scope", "$http", "$state", function ($scope, $http, $state) {
     var normalizations = ['Original', 'Custom', 'NFC', 'NFD', 'NFKC', 'NFKD'];
     $scope.input = $state.params.input || '';
     $scope.$watch('input', function (input) {
@@ -204,7 +204,7 @@ app.controller('stringCtrl', function ($scope, $http, $state) {
             };
         });
     });
-});
+}]);
 var GeneralCategories = {
     "Lu": "Uppercase_Letter",
     "Ll": "Lowercase_Letter",

@@ -40,5 +40,5 @@ dev: $(BIN)/browserify $(BIN)/watchify $(BIN)/watsh
 	(\
    $(BIN)/watsh 'make site.css' site.less & \
    $(BIN)/tsc -m commonjs -t ES5 -w *.ts & \
-   $(BIN)/watchify -u unidata app.js -o build/bundle.js -v & \
+   $(BIN)/watchify -t browserify-ngannotate -u unidata app.js -o build/bundle.js -v & \
    wait)
