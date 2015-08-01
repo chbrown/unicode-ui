@@ -45,7 +45,7 @@ function clean(object) {
 
 app.config(($stateProvider, $urlRouterProvider) => {
   $urlRouterProvider.otherwise(($injector, $location) => {
-    return '/characters?start=32&end=255&limit=200';
+    return '/characters?start=32';
   });
 
   $stateProvider

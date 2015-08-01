@@ -27,6 +27,7 @@
     "browserify": "*",
     "browserify-ngannotate": "*",
     "typescript": "latest",
-    "watchify": "*"
+    "watchify": "*",
+    "watsh": "*"
   }
 }

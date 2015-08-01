@@ -5,7 +5,7 @@ DTS = virtual-dom/virtual-dom unorm/unorm \
 all: site.css build/unidata.min.js build/bundle.min.js favicon.ico
 type_declarations: $(DTS:%=type_declarations/DefinitelyTyped/%.d.ts)
 
-$(BIN)/tsc $(BIN)/browserify $(BIN)/watchify:
+$(BIN)/%:
 	npm install
 
 type_declarations/DefinitelyTyped/%:
@@ -36,7 +36,9 @@ build/unidata.js: $(BIN)/browserify
 	mkdir -p $(@D)
 	$(BIN)/browserify -r unidata -o $@
 
-dev: $(BIN)/browserify $(BIN)/watchify
-	($(BIN)/tsc -m commonjs -t ES5 -w *.ts & \
+dev: $(BIN)/browserify $(BIN)/watchify $(BIN)/watsh
+	(\
+   $(BIN)/watsh 'make site.css' site.less & \
+   $(BIN)/tsc -m commonjs -t ES5 -w *.ts & \
    $(BIN)/watchify -u unidata app.js -o build/bundle.js -v & \
    wait)
