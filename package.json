@@ -10,7 +10,10 @@
     "interface"
   ],
   "homepage": "https://github.com/chbrown/unicode-ui",
-  "repository": "git://github.com/chbrown/unicode-ui.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chbrown/unicode-ui.git"
+  },
   "private": true,
   "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
   "license": "MIT",
@@ -18,7 +21,7 @@
     "angular": "*",
     "angular-ui-router": "*",
     "flow-copy": "*",
-    "ngstorage": "gsklee/ngStorage",
+    "ngstorage": "*",
     "virtual-dom": "*",
     "unidata": "*",
     "unorm": "*"
@@ -26,7 +29,8 @@
   "devDependencies": {
     "browserify": "*",
     "browserify-ngannotate": "*",
-    "typescript": "latest",
+    "declarations": "*",
+    "typescript": "next",
     "watchify": "*",
     "watsh": "*"
   }

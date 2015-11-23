@@ -1,4 +1,3 @@
-/// <reference path="type_declarations/index.d.ts" />
 import * as unorm from 'unorm';
 import {VNode} from 'virtual-dom';
 import h = require('virtual-dom/h');
@@ -6,7 +5,7 @@ import create = require('virtual-dom/create-element');
 import diff = require('virtual-dom/diff');
 import patch = require('virtual-dom/patch');
 
-import * as unidata from 'unidata';
+import {Character, getBlocks, getCharacters} from 'unidata';
 
 import angular = require('angular');
 import 'angular-ui-router';
@@ -114,8 +113,8 @@ interface Params {
   limit: number;
 }
 
-const characters: unidata.Character[] = unidata.getCharacters();
-const blocks: unidata.Block[] = unidata.getBlocks();
+const characters = getCharacters();
+const blocks = getBlocks();
 
 app.controller('charactersCtrl', ($scope, $http, $q, $state) => {
   var params: Params = $scope.params = angular.copy($state.params);
@@ -308,7 +307,7 @@ var CombiningClass = {
   240: "Iota_Subscript",
 };
 
-function renderUcdTable(characters: unidata.Character[]): VNode {
+function renderUcdTable(characters: Character[]): VNode {
   var rows = characters.map(character => {
     return h('tr', [
       h('td.num', character.code.toString()),

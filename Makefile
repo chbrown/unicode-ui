@@ -1,28 +1,12 @@
 BIN = node_modules/.bin
-DTS = virtual-dom/virtual-dom unorm/unorm \
-	jquery/jquery angularjs/angular angularjs/angular-resource
 
-all: site.css build/unidata.min.js build/bundle.min.js favicon.ico
-type_declarations: $(DTS:%=type_declarations/DefinitelyTyped/%.d.ts)
+all: site.css build/unidata.min.js build/bundle.min.js
 
-$(BIN)/%:
+$(BIN)/tsc $(BIN)/browserify $(BIN)/watchify $(BIN)/watsh:
 	npm install
 
-type_declarations/DefinitelyTyped/%:
-	mkdir -p $(@D)
-	curl -s https://raw.githubusercontent.com/chbrown/DefinitelyTyped/master/$* > $@
-
-.INTERMEDIATE: favicon-16.png favicon-32.png
-favicon-%.png: logo.psd
-	convert $<[0] -resize $*x$* $@
-favicon.ico: favicon-16.png favicon-32.png
-	convert $^ $@
-
-%.css: %.less
-	lessc $< | cleancss --keep-line-breaks --skip-advanced -o $@
-
-%.js: %.ts $(BIN)/tsc type_declarations
-	$(BIN)/tsc -m commonjs -t ES5 $<
+%.js: %.ts $(BIN)/tsc
+	$(BIN)/tsc
 
 %.min.js: %.js
 	closure-compiler --angular_pass --language_in ECMASCRIPT5 --warning_level QUIET $< >$@

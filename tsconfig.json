@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES5"
+  },
+  "files": [
+    "node_modules/declarations/angularjs/angular.d.ts",
+    "node_modules/declarations/node/node.d.ts",
+    "node_modules/declarations/unorm/unorm.d.ts",
+    "node_modules/declarations/virtual-dom/virtual-dom.d.ts",
+    "app.ts"
+  ]
+}
