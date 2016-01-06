@@ -8,7 +8,7 @@ $(BIN)/tsc $(BIN)/webpack:
 %.js: %.ts $(BIN)/tsc
 	$(BIN)/tsc
 
-build/bundle.js: webpack.config.js $(BIN)/webpack
+build/bundle.js: webpack.config.js app.tsx $(BIN)/webpack
 	NODE_ENV=production $(BIN)/webpack --config $<
 
 dev: webpack.config.js $(BIN)/webpack

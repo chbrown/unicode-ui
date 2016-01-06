@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as unorm from 'unorm';
 import createHistory from 'history/lib/createHashHistory';
-import Router, {Route} from 'react-router';
+import Router, {Route, IndexRedirect} from 'react-router';
 import * as ReactRouter from 'react-router';
 
 import './site.less';
@@ -82,6 +82,17 @@ const CombiningClass = {
 const characters = getCharacters();
 const blocks = getBlocks();
 
+function pruneObject<T>(source: T, falsyValues = [undefined, null, '']): T {
+  let target: T = {} as any;
+  Object.keys(source).forEach(key => {
+    let value = source[key];
+    if (falsyValues.indexOf(value) === -1) {
+      target[key] = value;
+    }
+  });
+  return target;
+}
+
 function isEmpty(val: any): boolean {
   return (val === undefined) || (val === null) || (val === '');
 }
@@ -125,72 +136,93 @@ const UcdTable = ({characters}: {characters: Character[]}) => (
   </table>
 );
 
-interface CharacterFilter {
+interface CharactersParams {
   start?: string;
   end?: string;
   name?: string;
   cat?: string;
+  limit?: string;
 }
-const defaultCharacterFilter = {
+const defaultCharactersParams = {
   start: '32',
   end: '',
   name: '',
   cat: '',
+  limit: '256',
 };
-/** search through all 27,268 characters in the unidata character set */
-function findCharacters({start, end, name, cat}: CharacterFilter) {
-  let startNumber = parseInt(start, 10);
-  let endNumber = parseInt(end, 10);
-  let ignore_start = isNaN(startNumber);
-  let ignore_end = isNaN(endNumber);
-  let nameUpper = name.toUpperCase();
+/** search through all 29K characters in the unidata character set */
+function findCharacters({start, end, name, cat}: {start: number, end: number, name: string, cat: string}) {
+  let ignore_start = isNaN(start);
+  let ignore_end = isNaN(end);
   let ignore_name = isEmpty(name);
   let ignore_cat = isEmpty(cat);
   let matchingCharacters = characters.filter(character => {
-    var after_start = ignore_start || (character.code >= startNumber);
-    var before_end = ignore_end || (character.code <= endNumber);
-    var name_matches = ignore_name || character.name.includes(nameUpper);
+    var after_start = ignore_start || (character.code >= start);
+    var before_end = ignore_end || (character.code <= end);
+    var name_matches = ignore_name || character.name.includes(name);
     var cat_matches = ignore_cat || ((character.cat || 'L') === cat);
     return after_start && before_end && name_matches && cat_matches;
   });
   return matchingCharacters;
 }
-class CharactersView extends React.Component<any, CharacterFilter & {limit?: string}> {
+class CharactersView extends React.Component<any, CharactersParams & {characters?: Character[]}> {
+  _findCharactersQueued = false;
   constructor() {
     super();
-    this.state = Object.assign({limit: '256'}, defaultCharacterFilter);
+    this.state = Object.assign({characters: []}, defaultCharactersParams);
+    this.refreshCharacters();
   }
   componentWillMount() {
-    console.log('CharactersView.props', this.props);
-    let {start, end, name} = this.props.location.query;
-    this.setState(Object.assign({start, end, name}, defaultCharacterFilter));
+    let {start, end, name, cat, limit} = this.props.location.query;
+    this.setState(pruneObject({start, end, name, cat, limit}));
   }
   onBlockChange(ev: Event) {
     // not being able to pass raw objects easily in a select is one disadvantage of React
     let [start, end] = (ev.target as HTMLInputElement).value.split('-');
-    // setState's DT is wrong. It shouldn't require that the argument be a full
-    // state, but only a subset of that state interface.
-    this.setState({start, end});
+    this.setParams({start, end});
   }
   onCategoryChange(ev: Event) {
     // not being able to pass raw objects easily in a select is one disadvantage of React
     let cat = (ev.target as HTMLInputElement).value;
-    // setState's type declarations are wrong. It shouldn't require that the
-    // argument be a full state, but only a subset of the state interface.
-    this.setState({cat});
+    this.setParams({cat});
   }
   onParamChange(key: string, ev: Event) {
-    // ng-model-options="{debounce: 500}"
     let value = (ev.target as HTMLInputElement).value;
-    this.setState({[key]: value});
-    let query = Object.assign({}, this.props.location.query, {[key]: value});
-    this.context['router'].push({pathname: this.props.location.pathname, query});
+    this.setParams({[key]: value});
+  }
+  /** wrapper around setState */
+  setParams(params) {
+    // setState's type declarations are wrong. It shouldn't require that the
+    // argument be a full state, but only a subset of the state interface.
+    this.setState(params, () => {
+      let {start, end, name, cat, limit} = pruneObject(this.state);
+      let query = pruneObject({start, end, name, cat, limit});
+      this.context['router'].push({pathname: this.props.location.pathname, query});
+    });
+    // recompute matchingCharacters
+    this.refreshCharacters();
+  }
+  /** debounce running findCharacters for 500ms */
+  refreshCharacters() {
+    if (!this._findCharactersQueued) {
+      this._findCharactersQueued = true;
+      setTimeout(() => {
+        let {start, end, name, cat} = this.state;
+        let characters = findCharacters({
+          start: parseInt(start, 10),
+          end: parseInt(end, 10),
+          name: name.toUpperCase(),
+          cat,
+        });
+        this.setState({characters});
+        this._findCharactersQueued = false;
+      }, 500);
+    }
   }
   render() {
     // blocks and GeneralCategories are globals
-    let {start, end, name, cat, limit} = this.state;
-    let matchingCharacters = findCharacters({start, end, name, cat});
-    let limitedMatchingCharacters = matchingCharacters.slice(0, parseInt(limit, 10) || 256);
+    let {start, end, name, cat, limit, characters} = this.state;
+    let limitedCharacters = characters.slice(0, parseInt(limit, 10) || 256);
     return (
       <div>
         <div className="hcontrol">
@@ -239,9 +271,9 @@ class CharactersView extends React.Component<any, CharacterFilter & {limit?: str
           </label>
         </div>
         <h3 className="hpad">
-          Showing {limitedMatchingCharacters.length} of {matchingCharacters.length} matching characters
+          Showing {limitedCharacters.length} of {characters.length} matching characters
         </h3>
-        <UcdTable characters={limitedMatchingCharacters} />
+        <UcdTable characters={limitedCharacters} />
       </div>
     );
   }
@@ -386,17 +418,21 @@ class StringView extends React.Component<{}, {input: string}> {
   }
 }
 
-class App extends React.Component<{children: any}, {}> {
+class App extends React.Component<{children: any, location: any}, {}> {
   render() {
+    let {pathname} = this.props.location;
+    let tabs = [
+      {href: "/characters", content: "Character Table"},
+      {href: "/string", content: "String"},
+    ];
     return (
       <div>
         <nav>
-          <span className="tab">
-            <a href="#/characters">Character Table</a>
-          </span>
-          <span className="tab">
-            <a href="#/string">String</a>
-          </span>
+          {tabs.map(tab =>
+            <span key={tab.href} className={`tab ${pathname === tab.href ? 'current' : ''}`}>
+              <a href={`#${tab.href}`}>{tab.content}</a>
+            </span>
+          )}
         </nav>
         <main>{this.props.children}</main>
       </div>
@@ -413,6 +449,7 @@ ReactDOM.render((
     <Route path="/" component={App}>
       <Route path="characters" component={CharactersView} />
       <Route path="string" component={StringView} />
+      <IndexRedirect to="characters" />
     </Route>
   </Router>
 ), document.getElementById('app'));
