@@ -1,13 +1,16 @@
 {
   "compilerOptions": {
+    "jsx": "react",
     "module": "commonjs",
-    "target": "ES5"
+    "moduleResolution": "node",
+    "target": "ES6"
   },
   "files": [
-    "node_modules/declarations/angularjs/angular.d.ts",
-    "node_modules/declarations/node/node.d.ts",
+    "node_modules/declarations/history/history.d.ts",
+    "node_modules/declarations/react/react.d.ts",
+    "node_modules/declarations/react/react-dom.d.ts",
+    "node_modules/declarations/react-router/react-router.d.ts",
     "node_modules/declarations/unorm/unorm.d.ts",
-    "node_modules/declarations/virtual-dom/virtual-dom.d.ts",
-    "app.ts"
+    "app.tsx"
   ]
 }

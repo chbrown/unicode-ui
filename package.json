@@ -18,20 +18,23 @@
   "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
   "license": "MIT",
   "dependencies": {
-    "angular": "*",
-    "angular-ui-router": "*",
-    "flow-copy": "*",
-    "ngstorage": "*",
-    "virtual-dom": "*",
+    "history": "*",
+    "react": "*",
+    "react-dom": "*",
+    "react-router": "2.0.0-rc4",
     "unidata": "*",
     "unorm": "*"
   },
   "devDependencies": {
-    "browserify": "*",
-    "browserify-ngannotate": "*",
+    "babel-core": "^5.0.0",
+    "babel-loader": "^5.0.0",
+    "css-loader": "*",
     "declarations": "*",
+    "less": "*",
+    "less-loader": "*",
+    "style-loader": "*",
+    "ts-loader": "*",
     "typescript": "next",
-    "watchify": "*",
-    "watsh": "*"
+    "webpack": "*"
   }
 }
