@@ -79,8 +79,8 @@ const CombiningClass = {
   240: "Iota_Subscript",
 };
 
-const characters = getCharacters();
-const blocks = getBlocks();
+const allCharacters = getCharacters();
+const allBlocks = getBlocks();
 
 function pruneObject<T>(source: T, falsyValues = [undefined, null, '']): T {
   let target: T = {} as any;
@@ -156,7 +156,7 @@ function findCharacters({start, end, name, cat}: {start: number, end: number, na
   let ignore_end = isNaN(end);
   let ignore_name = isEmpty(name);
   let ignore_cat = isEmpty(cat);
-  let matchingCharacters = characters.filter(character => {
+  let matchingCharacters = allCharacters.filter(character => {
     var after_start = ignore_start || (character.code >= start);
     var before_end = ignore_end || (character.code <= end);
     var name_matches = ignore_name || character.name.includes(name);
@@ -228,10 +228,13 @@ class CharactersView extends React.Component<any, CharactersParams & {characters
         <div className="hcontrol">
           <label>
             <div><b>Block</b></div>
-            <select value={`${start}-${end}`} onChange={this.onBlockChange.bind(this)} style={{width: '150px'}}>
-              <option value="-">-- All --</option>
-              {blocks.map(block =>
-                <option key={block.blockName} value={`${block.startCode}-${block.endCode}`}>{block.blockName}</option>
+            <select value={`${start}-${end}`} onChange={this.onBlockChange.bind(this)} style={{width: '200px'}}>
+              <option key="custom">-- Custom --</option>
+              <option key="all" value="-">All ({allCharacters.length})</option>
+              {allBlocks.map(({blockName, startCode, endCode}) =>
+                <option key={blockName} value={`${startCode}-${endCode}`}>
+                  {`${blockName} (${1 + endCode - startCode})`}
+                </option>
               )}
             </select>
           </label>
@@ -266,7 +269,7 @@ class CharactersView extends React.Component<any, CharactersParams & {characters
         <div className="hcontrol">
           <label>
             <div><b>Limit</b></div>
-            <input type="number" placeholder="limit" style={{width: '50px'}}
+            <input type="number" style={{width: '50px'}}
               value={limit.toString()} onChange={this.onParamChange.bind(this, 'limit')} />
           </label>
         </div>
