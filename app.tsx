@@ -5,6 +5,16 @@ import createHistory from 'history/lib/createHashHistory';
 import Router, {Route, IndexRedirect} from 'react-router';
 import * as ReactRouter from 'react-router';
 
+// HistoryModule.Location isn't terribly nice to use, since query has type `Object`, not `any`
+interface Location {
+  pathname: string;
+  search: string;
+  query: any;
+  state: any;
+  action: string;
+  key: string;
+}
+
 import './site.less';
 
 import {Block, getBlocks, Character, getCharacters} from 'unidata';
@@ -165,7 +175,7 @@ function findCharacters({start, end, name, cat}: {start: number, end: number, na
   });
   return matchingCharacters;
 }
-class CharactersView extends React.Component<any, CharactersParams & {characters?: Character[]}> {
+class CharactersView extends React.Component<{location: Location}, CharactersParams & {characters?: Character[]}> {
   _findCharactersQueued = false;
   constructor() {
     super();
@@ -394,13 +404,16 @@ const NormalizationTable = ({input, form}: {input: string, form: string}) => {
     </section>
   );
 };
-class StringView extends React.Component<{}, {input: string}> {
+class StringView extends React.Component<{location: Location}, {input: string}> {
   constructor() {
     super();
     this.state = {input: ''};
   }
   onInputChanged(ev) {
-    this.setState({input: ev.target.value});
+    let input = ev.target.value;
+    this.setState({input});
+    let query = pruneObject({input});
+    this.context['router'].push({pathname: this.props.location.pathname, query});
   }
   render() {
     const normalizationForms = ['Original', 'Custom', 'NFC', 'NFD', 'NFKC', 'NFKD'];
@@ -420,6 +433,9 @@ class StringView extends React.Component<{}, {input: string}> {
     );
   }
 }
+StringView['contextTypes'] = {
+  router: React.PropTypes.object.isRequired,
+};
 
 class App extends React.Component<{children: any, location: any}, {}> {
   render() {
