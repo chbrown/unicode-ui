@@ -117,8 +117,8 @@ const UcdTable = ({characters}: {characters: Character[]}) => (
         <th>Character</th>
         <th>Name</th>
         <th>GeneralCategory</th>
-        <th>CombiningClass</th>
-        <th>Decomposition</th>
+        <th title="CombiningClass">Comb</th>
+        <th title="Decomposition">Decomp</th>
         <th title="NumberValue">#</th>
         <th title="Uppercase">UC</th>
         <th title="Lowercase">LC</th>
@@ -230,7 +230,7 @@ class CharactersView extends React.Component<{location: Location}, CharactersPar
     }
   }
   render() {
-    // blocks and GeneralCategories are globals
+    // allBlocks and GeneralCategories are globals
     let {start, end, name, cat, limit, characters} = this.state;
     let limitedCharacters = characters.slice(0, parseInt(limit, 10) || 256);
     return (
