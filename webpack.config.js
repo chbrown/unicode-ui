@@ -1,15 +1,11 @@
 var path = require('path');
 var webpack = require('webpack');
 
-var production = process.env.NODE_ENV == 'production';
-var extraPlugins = production ? [
-  new webpack.optimize.UglifyJsPlugin(),
-  new webpack.optimize.OccurenceOrderPlugin(),
-] : [];
+var env = process.env.NODE_ENV || 'development';
 
 module.exports = {
   entry: {
-    app: './app.tsx',
+    app: './app',
     unidata: ['unidata'],
   },
   output: {
@@ -18,30 +14,26 @@ module.exports = {
   },
   plugins: [
     // exclude unidata from bundle.js and include it separately
-    new webpack.optimize.CommonsChunkPlugin('unidata', 'unidata.js'),
-  ].concat(extraPlugins),
-  resolve: {
-    extensions: [
-      '',
-      '.js',
-      '.jsx',
-      '.ts',
-      '.tsx',
-    ],
-  },
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'unidata',
+      filename: 'unidata.js',
+    }),
+    // enable production builds:
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify(env),
+    }),
+    ...(env === 'development' ? [
+      new webpack.NoErrorsPlugin(),
+    ] : [
+      new webpack.optimize.OccurenceOrderPlugin(),
+      new webpack.optimize.UglifyJsPlugin(),
+    ]),
+  ],
   module: {
     loaders: [
       {
-        test: /\.tsx?$/,
-        loaders: ['babel-loader', 'ts-loader'],
-        include: __dirname,
-        exclude: /node_modules/,
-      },
-      {
-        test: /\.jsx?$/,
+        test: /\.js$/,
         loaders: ['babel-loader'],
-        include: __dirname,
-        exclude: /node_modules/,
       },
       {
         test: /\.less$/,
