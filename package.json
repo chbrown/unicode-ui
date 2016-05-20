@@ -1,7 +1,7 @@
 {
   "name": "unicode-ui",
   "description": "Unicode character data viewer and reference",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "keywords": [
     "unicode",
     "character",
@@ -38,6 +38,8 @@
     "webpack": "*"
   },
   "babel": {
-    "presets": ["es2015"]
+    "presets": [
+      "es2015"
+    ]
   }
 }
