@@ -1,9 +1,11 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as unorm from 'unorm';
-import createHistory from 'history/lib/createHashHistory';
-import Router, {Route, IndexRedirect} from 'react-router';
-import * as ReactRouter from 'react-router';
+import {createHashHistory, useQueries} from 'history';
+import {Router, Route, IndexRedirect, hashHistory, useRouterHistory} from 'react-router';
+import {Block, getBlocks, Character, getCharacters} from 'unidata';
+
+import './site.less';
 
 // HistoryModule.Location isn't terribly nice to use, since query has type `Object`, not `any`
 interface Location {
@@ -15,9 +17,8 @@ interface Location {
   key: string;
 }
 
-import './site.less';
-
-import {Block, getBlocks, Character, getCharacters} from 'unidata';
+const allCharacters = getCharacters();
+const allBlocks = getBlocks();
 
 const GeneralCategories = {
   "Lu": "Uppercase_Letter",
@@ -89,9 +90,6 @@ const CombiningClass = {
   240: "Iota_Subscript",
 };
 
-const allCharacters = getCharacters();
-const allBlocks = getBlocks();
-
 function pruneObject<T>(source: T, falsyValues = [undefined, null, '']): T {
   let target: T = {} as any;
   Object.keys(source).forEach(key => {
@@ -114,6 +112,7 @@ const UcdTable = ({characters}: {characters: Character[]}) => (
         <th>dec</th>
         <th>hex</th>
         <th>oct</th>
+        <th>bin</th>
         <th>Character</th>
         <th>Name</th>
         <th>GeneralCategory</th>
@@ -131,6 +130,7 @@ const UcdTable = ({characters}: {characters: Character[]}) => (
           <td className="num">{character.code.toString()}</td>
           <td className="num">{character.code.toString(16).toUpperCase()}</td>
           <td className="num">{character.code.toString(8)}</td>
+          <td className="num">{character.code.toString(2)}</td>
           <td className="str">{String.fromCharCode(character.code)}</td>
           <td>{character.name}</td>
           <td>{GeneralCategories[character.cat]}</td>
@@ -459,16 +459,14 @@ class App extends React.Component<{children: any, location: any}, {}> {
   }
 }
 
-// import {useRouterHistory} from 'react-router'; // not yet in DefinitelyTyped
-const useRouterHistory = ReactRouter['useRouterHistory'];
-const appHistory = useRouterHistory(createHistory)({queryKey: false});
+const appHistory = useRouterHistory(useQueries(createHashHistory))({queryKey: false});
 
 ReactDOM.render((
   <Router history={appHistory}>
     <Route path="/" component={App}>
+      <IndexRedirect to="/characters" />
       <Route path="characters" component={CharactersView} />
       <Route path="string" component={StringView} />
-      <IndexRedirect to="characters" />
     </Route>
   </Router>
 ), document.getElementById('app'));
