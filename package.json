@@ -18,10 +18,10 @@
   "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
   "license": "MIT",
   "dependencies": {
-    "history": "*",
-    "react": "*",
-    "react-dom": "*",
-    "react-router": "*",
+    "history": "^2.0.0",
+    "react": "^15.3.0",
+    "react-dom": "^15.3.0",
+    "react-router": "^2.8.0",
     "unidata": "*"
   },
   "devDependencies": {
