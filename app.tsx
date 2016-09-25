@@ -1,6 +1,5 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import * as unorm from 'unorm';
 import {createHashHistory, useQueries} from 'history';
 import {Router, Route, IndexRedirect, hashHistory, useRouterHistory} from 'react-router';
 import {Block, getBlocks, Character, getCharacters} from 'unidata';
@@ -344,7 +343,7 @@ export function normalize(raw: string): string {
     return modifier + modified;
   });
   // and replacing the combining character pairs with precombined characters where possible
-  // var canonical = unorm.nfc(normalized);
+  // var canonical = convert_to_nfc(normalized);
   return modifiers_applied;
 }
 function charCodeUrl(charCode: number): string {
@@ -391,7 +390,7 @@ const NormalizationTable = ({input, form}: {input: string, form: string}) => {
     input = normalize(input);
   }
   else if (form !== 'Original') {
-    input = unorm[form.toLowerCase()](input);
+    input = input.normalize(form);
   }
   let charCodes: number[] = [];
   for (var i = 0; i < input.length; i++) {
