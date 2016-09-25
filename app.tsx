@@ -90,9 +90,9 @@ const CombiningClass = {
 };
 
 function pruneObject<T>(source: T, falsyValues = [undefined, null, '']): T {
-  let target: T = {} as any;
+  const target: T = {} as any;
   Object.keys(source).forEach(key => {
-    let value = source[key];
+    const value = source[key];
     if (falsyValues.indexOf(value) === -1) {
       target[key] = value;
     }
@@ -104,46 +104,67 @@ function isEmpty(val: any): boolean {
   return (val === undefined) || (val === null) || (val === '');
 }
 
-const UcdTable = ({characters}: {characters: Character[]}) => (
-  <table className="characters fill padded lined striped">
-    <thead>
+class UcdRow extends React.Component<{character: Character}, {}> {
+  shouldComponentUpdate(nextProps) {
+    return nextProps.character !== this.props.character;
+  }
+  render() {
+    const {character} = this.props;
+    return (
       <tr>
-        <th>dec</th>
-        <th>hex</th>
-        <th>oct</th>
-        <th>bin</th>
-        <th>Character</th>
-        <th>Name</th>
-        <th>GeneralCategory</th>
-        <th title="CombiningClass">Comb</th>
-        <th title="Decomposition">Decomp</th>
-        <th title="NumberValue">#</th>
-        <th title="Uppercase">UC</th>
-        <th title="Lowercase">LC</th>
-        <th title="Titlecase">TC</th>
+        <td className="num">{character.code.toString()}</td>
+        <td className="num">{character.code.toString(16).toUpperCase()}</td>
+        <td className="num">{character.code.toString(8)}</td>
+        <td className="num">{character.code.toString(2)}</td>
+        <td className="str">{String.fromCharCode(character.code)}</td>
+        <td>{character.name}</td>
+        <td>{GeneralCategories[character.cat]}</td>
+        <td>{CombiningClass[character.comb]}</td>
+        <td>{character.decompType} {(character.decomp || []).map(code => '0x' + code.toString(16)).join(' ')}</td>
+        <td title="NumberValue">{character.num}</td>
+        <td title="Uppercase">{String.fromCharCode(character.upper)}</td>
+        <td title="Lowercase">{String.fromCharCode(character.lower)}</td>
+        <td title="Titlecase">{String.fromCharCode(character.title)}</td>
       </tr>
-    </thead>
-    <tbody>
-      {characters.map((character, i) =>
-        <tr key={i}>
-          <td className="num">{character.code.toString()}</td>
-          <td className="num">{character.code.toString(16).toUpperCase()}</td>
-          <td className="num">{character.code.toString(8)}</td>
-          <td className="num">{character.code.toString(2)}</td>
-          <td className="str">{String.fromCharCode(character.code)}</td>
-          <td>{character.name}</td>
-          <td>{GeneralCategories[character.cat]}</td>
-          <td>{CombiningClass[character.comb]}</td>
-          <td>{character.decompType} {(character.decomp || []).map(code => '0x' + code.toString(16)).join(' ')}</td>
-          <td title="NumberValue">{character.num}</td>
-          <td title="Uppercase">{String.fromCharCode(character.upper)}</td>
-          <td title="Lowercase">{String.fromCharCode(character.lower)}</td>
-          <td title="Titlecase">{String.fromCharCode(character.title)}</td>
-        </tr>
-      )}
-    </tbody>
-  </table>
-);
+    );
+  }
+}
+
+class UcdTable extends React.Component<{characters: Character[]}, {}> {
+  shouldComponentUpdate(nextProps) {
+    return (nextProps.characters.length !== this.props.characters.length) ||
+      (nextProps.characters !== this.props.characters);
+  }
+  render() {
+    const {characters} = this.props;
+    return (
+      <table className="characters fill padded lined striped">
+        <thead>
+          <tr>
+            <th>dec</th>
+            <th>hex</th>
+            <th>oct</th>
+            <th>bin</th>
+            <th>Character</th>
+            <th>Name</th>
+            <th>GeneralCategory</th>
+            <th title="CombiningClass">Comb</th>
+            <th title="Decomposition">Decomp</th>
+            <th title="NumberValue">#</th>
+            <th title="Uppercase">UC</th>
+            <th title="Lowercase">LC</th>
+            <th title="Titlecase">TC</th>
+          </tr>
+        </thead>
+        <tbody>
+          {characters.map((character, i) =>
+            <UcdRow key={i} character={character} />
+          )}
+        </tbody>
+      </table>
+    );
+  }
+}
 
 interface CharactersParams {
   start?: string;
@@ -161,15 +182,15 @@ const defaultCharactersParams = {
 };
 /** search through all 29K characters in the unidata character set */
 function findCharacters({start, end, name, cat}: {start: number, end: number, name: string, cat: string}) {
-  let ignore_start = isNaN(start);
-  let ignore_end = isNaN(end);
-  let ignore_name = isEmpty(name);
-  let ignore_cat = isEmpty(cat);
-  let matchingCharacters = allCharacters.filter(character => {
-    var after_start = ignore_start || (character.code >= start);
-    var before_end = ignore_end || (character.code <= end);
-    var name_matches = ignore_name || character.name.includes(name);
-    var cat_matches = ignore_cat || ((character.cat || 'L') === cat);
+  const ignore_start = isNaN(start);
+  const ignore_end = isNaN(end);
+  const ignore_name = isEmpty(name);
+  const ignore_cat = isEmpty(cat);
+  const matchingCharacters = allCharacters.filter(character => {
+    const after_start = ignore_start || (character.code >= start);
+    const before_end = ignore_end || (character.code <= end);
+    const name_matches = ignore_name || character.name.includes(name);
+    const cat_matches = ignore_cat || ((character.cat || 'L') === cat);
     return after_start && before_end && name_matches && cat_matches;
   });
   return matchingCharacters;
@@ -182,21 +203,21 @@ class CharactersView extends React.Component<{location: Location}, CharactersPar
     this.refreshCharacters();
   }
   componentWillMount() {
-    let {start, end, name, cat, limit} = this.props.location.query;
+    const {start, end, name, cat, limit} = this.props.location.query;
     this.setState(pruneObject({start, end, name, cat, limit}));
   }
   onBlockChange(ev: Event) {
     // not being able to pass raw objects easily in a select is one disadvantage of React
-    let [start, end] = (ev.target as HTMLInputElement).value.split('-');
+    const [start, end] = (ev.target as HTMLInputElement).value.split('-');
     this.setParams({start, end});
   }
   onCategoryChange(ev: Event) {
     // not being able to pass raw objects easily in a select is one disadvantage of React
-    let cat = (ev.target as HTMLInputElement).value;
+    const cat = (ev.target as HTMLInputElement).value;
     this.setParams({cat});
   }
   onParamChange(key: string, ev: Event) {
-    let value = (ev.target as HTMLInputElement).value;
+    const value = (ev.target as HTMLInputElement).value;
     this.setParams({[key]: value});
   }
   /** wrapper around setState */
@@ -204,20 +225,20 @@ class CharactersView extends React.Component<{location: Location}, CharactersPar
     // setState's type declarations are wrong. It shouldn't require that the
     // argument be a full state, but only a subset of the state interface.
     this.setState(params, () => {
-      let {start, end, name, cat, limit} = pruneObject(this.state);
-      let query = pruneObject({start, end, name, cat, limit});
+      const {start, end, name, cat, limit} = pruneObject(this.state);
+      const query = pruneObject({start, end, name, cat, limit});
       this.context['router'].push({pathname: this.props.location.pathname, query});
     });
     // recompute matchingCharacters
     this.refreshCharacters();
   }
-  /** debounce running findCharacters for 500ms */
+  /** debounce running findCharacters for 250ms */
   refreshCharacters() {
     if (!this._findCharactersQueued) {
       this._findCharactersQueued = true;
       setTimeout(() => {
-        let {start, end, name, cat} = this.state;
-        let characters = findCharacters({
+        const {start, end, name, cat} = this.state;
+        const characters = findCharacters({
           start: parseInt(start, 10),
           end: parseInt(end, 10),
           name: name.toUpperCase(),
@@ -225,13 +246,13 @@ class CharactersView extends React.Component<{location: Location}, CharactersPar
         });
         this.setState({characters});
         this._findCharactersQueued = false;
-      }, 500);
+      }, 250);
     }
   }
   render() {
     // allBlocks and GeneralCategories are globals
-    let {start, end, name, cat, limit, characters} = this.state;
-    let limitedCharacters = characters.slice(0, parseInt(limit, 10) || 256);
+    const {start, end, name, cat, limit, characters} = this.state;
+    const limitedCharacters = characters.slice(0, parseInt(limit, 10) || 256);
     return (
       <div>
         <div className="hcontrol">
@@ -327,23 +348,23 @@ const decomposable_modifiers = {
 };
 export function normalize(raw: string): string {
   // remove all character codes 0 through 31 (space is 32 == 0x1F)
-  let visible = raw.replace(/[\x00-\x1F]/g, '');
+  const visible = raw.replace(/[\x00-\x1F]/g, '');
   // 2. replace combining characters that are currently combining with a space
   // by the lone combiner so that they'll combine with the following character
   // instead, as intended.
-  let decompositions_applied = visible.replace(/[\u00A8\u00AF\u00B4\u00B8\u02D8-\u02DD]/g, (modifier) => {
+  const decompositions_applied = visible.replace(/[\u00A8\u00AF\u00B4\u00B8\u02D8-\u02DD]/g, (modifier) => {
     return decomposable_modifiers[modifier];
   });
   // 1. replace (modifier, letter) pairs with a single modified-letter character
   //    688 - 767
-  let modifiers_applied = decompositions_applied.replace(/([\u02B0-\u02FF])(.)/g, (m0, modifier, modified) => {
+  const modifiers_applied = decompositions_applied.replace(/([\u02B0-\u02FF])(.)/g, (m0, modifier, modified) => {
     if (modifier in modifier_to_combiner) {
       return modified + modifier_to_combiner[modifier];
     }
     return modifier + modified;
   });
   // and replacing the combining character pairs with precombined characters where possible
-  // var canonical = convert_to_nfc(normalized);
+  // const canonical = convert_to_nfc(normalized);
   return modifiers_applied;
 }
 function charCodeUrl(charCode: number): string {
@@ -392,8 +413,8 @@ const NormalizationTable = ({input, form}: {input: string, form: string}) => {
   else if (form !== 'Original') {
     input = input.normalize(form);
   }
-  let charCodes: number[] = [];
-  for (var i = 0; i < input.length; i++) {
+  const charCodes: number[] = [];
+  for (let i = 0; i < input.length; i++) {
     charCodes[i] = input.charCodeAt(i);
   }
   return (
@@ -409,14 +430,14 @@ class StringView extends React.Component<{location: Location}, {input: string}> 
     this.state = {input: ''};
   }
   onInputChanged(ev) {
-    let input = ev.target.value;
+    const input = ev.target.value;
     this.setState({input});
-    let query = pruneObject({input});
+    const query = pruneObject({input});
     this.context['router'].push({pathname: this.props.location.pathname, query});
   }
   render() {
     const normalizationForms = ['Original', 'Custom', 'NFC', 'NFD', 'NFKC', 'NFKD'];
-    let {input} = this.state;
+    const {input} = this.state;
     return (
       <div>
         <section className="hpad">
@@ -438,8 +459,8 @@ StringView['contextTypes'] = {
 
 class App extends React.Component<{children: any, location: any}, {}> {
   render() {
-    let {pathname} = this.props.location;
-    let tabs = [
+    const {pathname} = this.props.location;
+    const tabs = [
       {href: "/characters", content: "Character Table"},
       {href: "/string", content: "String"},
     ];
