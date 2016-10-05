@@ -15,4 +15,7 @@ build/bundle.js: webpack.config.js app.js $(NODE_PATH)/webpack
 	NODE_ENV=production $(NODE_PATH)/webpack --config $<
 
 dev: webpack.config.js $(NODE_PATH)/webpack
-	$(NODE_PATH)/webpack --watch --config $<
+	(\
+    $(NODE_PATH)/webpack --watch --config $< & \
+    $(NODE_PATH)/tsc -w & \
+    wait)
