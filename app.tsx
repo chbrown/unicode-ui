@@ -116,15 +116,15 @@ class UcdRow extends React.Component<{character: Character}, {}> {
         <td className="num">{character.code.toString(16).toUpperCase()}</td>
         <td className="num">{character.code.toString(8)}</td>
         <td className="num">{character.code.toString(2)}</td>
-        <td className="str">{String.fromCharCode(character.code)}</td>
+        <td className="str">{String.fromCodePoint(character.code)}</td>
         <td>{character.name}</td>
         <td>{GeneralCategories[character.cat]}</td>
         <td>{CombiningClass[character.comb]}</td>
         <td>{character.decompType} {(character.decomp || []).map(code => '0x' + code.toString(16)).join(' ')}</td>
         <td title="NumberValue">{character.num}</td>
-        <td title="Uppercase">{String.fromCharCode(character.upper)}</td>
-        <td title="Lowercase">{String.fromCharCode(character.lower)}</td>
-        <td title="Titlecase">{String.fromCharCode(character.title)}</td>
+        <td title="Uppercase">{character.upper && String.fromCodePoint(character.upper)}</td>
+        <td title="Lowercase">{character.lower && String.fromCodePoint(character.lower)}</td>
+        <td title="Titlecase">{character.title && String.fromCodePoint(character.title)}</td>
       </tr>
     );
   }
