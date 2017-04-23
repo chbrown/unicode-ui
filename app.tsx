@@ -219,7 +219,7 @@ class CharactersView extends React.Component<{location: Location}, CharactersPar
             <select value={cat} onChange={this.onCategoryChange.bind(this)} style={{width: '150px'}}>
               <option value="">-- All --</option>
               {Object.keys(GeneralCategories).map(cat =>
-                <option key={cat} value={GeneralCategories[cat]}>{cat}</option>
+                <option key={cat} value={cat}>{GeneralCategories[cat]}</option>
               )}
             </select>
           </label>
