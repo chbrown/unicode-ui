@@ -191,7 +191,7 @@ class CharactersView extends React.Component<{location: Location}, CharactersPar
               <option key="all" value="-">All ({Characters.length})</option>
               {Blocks.map(({blockName, startCode, endCode}) =>
                 <option key={blockName} value={`${startCode}-${endCode}`}>
-                  {`${blockName} (${1 + endCode - startCode})`}
+                  {blockName} ({1 + endCode - startCode})
                 </option>
               )}
             </select>
