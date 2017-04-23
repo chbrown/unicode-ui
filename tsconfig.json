@@ -9,6 +9,7 @@
     "node_modules/declarations/react/react.d.ts",
     "node_modules/declarations/react/react-dom.d.ts",
     "node_modules/declarations/react-router/react-router.d.ts",
-    "app.tsx"
+    "app.tsx",
+    "unicode.ts"
   ]
 }

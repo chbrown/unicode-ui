@@ -2,7 +2,8 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {createHashHistory, useQueries} from 'history';
 import {Router, Route, IndexRedirect, hashHistory, useRouterHistory} from 'react-router';
-import {Block, getBlocks, Character, getCharacters} from 'unidata';
+import {Block, Character} from 'unidata';
+import {Blocks, Characters, GeneralCategories, CombiningClass} from './unicode';
 
 import './site.less';
 
@@ -15,79 +16,6 @@ interface Location {
   action: string;
   key: string;
 }
-
-const allCharacters = getCharacters();
-const allBlocks = getBlocks();
-
-const GeneralCategories = {
-  "Lu": "Uppercase_Letter",
-  "Ll": "Lowercase_Letter",
-  "Lt": "Titlecase_Letter",
-  "LC": "Cased_Letter",
-  "Lm": "Modifier_Letter",
-  "Lo": "Other_Letter",
-  "L": "Letter",
-  "Mn": "Nonspacing_Mark",
-  "Mc": "Spacing_Mark",
-  "Me": "Enclosing_Mark",
-  "M": "Mark",
-  "Nd": "Decimal_Number",
-  "Nl": "Letter_Number",
-  "No": "Other_Number",
-  "N": "Number",
-  "Pc": "Connector_Punctuation",
-  "Pd": "Dash_Punctuation",
-  "Ps": "Open_Punctuation",
-  "Pe": "Close_Punctuation",
-  "Pi": "Initial_Punctuation",
-  "Pf": "Final_Punctuation",
-  "Po": "Other_Punctuation",
-  "P": "Punctuation",
-  "Sm": "Math_Symbol",
-  "Sc": "Currency_Symbol",
-  "Sk": "Modifier_Symbol",
-  "So": "Other_Symbol",
-  "S": "Symbol",
-  "Zs": "Space_Separator",
-  "Zl": "Line_Separator",
-  "Zp": "Paragraph_Separator",
-  "Z": "Separator",
-  "Cc": "Control",
-  "Cf": "Format",
-  "Cs": "Surrogate",
-  "Co": "Private_Use",
-  "Cn": "Unassigned",
-  "C": "Other"
-};
-
-const CombiningClass = {
-  0: "Not_Reordered",
-  1: "Overlay",
-  7: "Nukta",
-  8: "Kana_Voicing",
-  9: "Virama",
-  10: "Ccc10",
-  // C"cc[11..199] = [11..199], // Fixed position classes
-  200: "Attached_Below_Left",
-  202: "Attached_Below",
-  204: "Marks_attached_at_the_bottom_right",
-  208: "Marks_attached_to_the_left",
-  210: "Marks_attached_to_the_right",
-  212: "Marks_attached_at_the_top_left",
-  214: "Attached_Above",
-  216: "Attached_Above_Right",
-  218: "Below_Left",
-  220: "Below",
-  222: "Below_Right",
-  224: "Left",
-  226: "Right",
-  228: "Above_Left",
-  230: "Above",
-  232: "Above_Right",
-  233: "Double_Below",
-  234: "Double_Above",
-  240: "Iota_Subscript",
-};
 
 function pruneObject<T>(source: T, falsyValues = [undefined, null, '']): T {
   const target: T = {} as any;
@@ -186,7 +114,7 @@ function findCharacters({start, end, name, cat}: {start: number, end: number, na
   const ignore_end = isNaN(end);
   const ignore_name = isEmpty(name);
   const ignore_cat = isEmpty(cat);
-  const matchingCharacters = allCharacters.filter(character => {
+  const matchingCharacters = Characters.filter(character => {
     const after_start = ignore_start || (character.code >= start);
     const before_end = ignore_end || (character.code <= end);
     const name_matches = ignore_name || character.name.includes(name);
@@ -250,7 +178,7 @@ class CharactersView extends React.Component<{location: Location}, CharactersPar
     }
   }
   render() {
-    // allBlocks and GeneralCategories are globals
+    // Blocks and GeneralCategories are globals
     const {start, end, name, cat, limit, characters} = this.state;
     const limitedCharacters = characters.slice(0, parseInt(limit, 10) || 256);
     return (
@@ -260,8 +188,8 @@ class CharactersView extends React.Component<{location: Location}, CharactersPar
             <div><b>Block</b></div>
             <select value={`${start}-${end}`} onChange={this.onBlockChange.bind(this)} style={{width: '200px'}}>
               <option key="custom">-- Custom --</option>
-              <option key="all" value="-">All ({allCharacters.length})</option>
-              {allBlocks.map(({blockName, startCode, endCode}) =>
+              <option key="all" value="-">All ({Characters.length})</option>
+              {Blocks.map(({blockName, startCode, endCode}) =>
                 <option key={blockName} value={`${startCode}-${endCode}`}>
                   {`${blockName} (${1 + endCode - startCode})`}
                 </option>
