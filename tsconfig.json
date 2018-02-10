@@ -5,10 +5,6 @@
     "target": "ES6"
   },
   "files": [
-    "node_modules/declarations/history/history.d.ts",
-    "node_modules/declarations/react/react.d.ts",
-    "node_modules/declarations/react/react-dom.d.ts",
-    "node_modules/declarations/react-router/react-router.d.ts",
     "app.tsx",
     "unicode.ts"
   ]
