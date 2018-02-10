@@ -39,6 +39,11 @@
     "typescript": "^2.7.1",
     "webpack": "1.13.2"
   },
+  "scripts": {
+    "prepare": "tsc",
+    "prepublishOnly": "NODE_ENV=production webpack --config webpack.config.js",
+    "start": "webpack --watch --config webpack.config.js & tsc -w"
+  },
   "babel": {
     "presets": [
       "es2015"
