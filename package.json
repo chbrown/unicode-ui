@@ -22,7 +22,7 @@
     "react": "^15.6.2",
     "react-dom": "^15.6.2",
     "react-router": "^2.8.1",
-    "unidata": "^8.1.1"
+    "unidata": "^10.0.0"
   },
   "devDependencies": {
     "@types/history": "^2.0.49",
