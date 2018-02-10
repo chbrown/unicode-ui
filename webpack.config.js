@@ -25,7 +25,6 @@ module.exports = {
     ...(env === 'development' ? [
       new webpack.NoErrorsPlugin(),
     ] : [
-      new webpack.optimize.OccurenceOrderPlugin(),
       new webpack.optimize.UglifyJsPlugin(),
     ]),
   ],
