@@ -1,7 +1,7 @@
 {
   "name": "unicode-ui",
   "description": "Unicode character data viewer and reference",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "keywords": [
     "unicode",
     "character",
