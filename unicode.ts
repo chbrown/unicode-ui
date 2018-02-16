@@ -1,48 +1,48 @@
-import {getBlocks, getCharacters} from 'unidata';
+import {getBlocks, getCharacters} from 'unidata'
 
-export const Characters = getCharacters();
-export const Blocks = getBlocks();
+export const Characters = getCharacters()
+export const Blocks = getBlocks()
 
 export const GeneralCategories = {
-  "Lu": "Uppercase_Letter",
-  "Ll": "Lowercase_Letter",
-  "Lt": "Titlecase_Letter",
-  "LC": "Cased_Letter",
-  "Lm": "Modifier_Letter",
-  "Lo": "Other_Letter",
-  "L": "Letter",
-  "Mn": "Nonspacing_Mark",
-  "Mc": "Spacing_Mark",
-  "Me": "Enclosing_Mark",
-  "M": "Mark",
-  "Nd": "Decimal_Number",
-  "Nl": "Letter_Number",
-  "No": "Other_Number",
-  "N": "Number",
-  "Pc": "Connector_Punctuation",
-  "Pd": "Dash_Punctuation",
-  "Ps": "Open_Punctuation",
-  "Pe": "Close_Punctuation",
-  "Pi": "Initial_Punctuation",
-  "Pf": "Final_Punctuation",
-  "Po": "Other_Punctuation",
-  "P": "Punctuation",
-  "Sm": "Math_Symbol",
-  "Sc": "Currency_Symbol",
-  "Sk": "Modifier_Symbol",
-  "So": "Other_Symbol",
-  "S": "Symbol",
-  "Zs": "Space_Separator",
-  "Zl": "Line_Separator",
-  "Zp": "Paragraph_Separator",
-  "Z": "Separator",
-  "Cc": "Control",
-  "Cf": "Format",
-  "Cs": "Surrogate",
-  "Co": "Private_Use",
-  "Cn": "Unassigned",
-  "C": "Other"
-};
+  Lu: "Uppercase_Letter",
+  Ll: "Lowercase_Letter",
+  Lt: "Titlecase_Letter",
+  LC: "Cased_Letter",
+  Lm: "Modifier_Letter",
+  Lo: "Other_Letter",
+  L:  "Letter",
+  Mn: "Nonspacing_Mark",
+  Mc: "Spacing_Mark",
+  Me: "Enclosing_Mark",
+  M:  "Mark",
+  Nd: "Decimal_Number",
+  Nl: "Letter_Number",
+  No: "Other_Number",
+  N:  "Number",
+  Pc: "Connector_Punctuation",
+  Pd: "Dash_Punctuation",
+  Ps: "Open_Punctuation",
+  Pe: "Close_Punctuation",
+  Pi: "Initial_Punctuation",
+  Pf: "Final_Punctuation",
+  Po: "Other_Punctuation",
+  P:  "Punctuation",
+  Sm: "Math_Symbol",
+  Sc: "Currency_Symbol",
+  Sk: "Modifier_Symbol",
+  So: "Other_Symbol",
+  S:  "Symbol",
+  Zs: "Space_Separator",
+  Zl: "Line_Separator",
+  Zp: "Paragraph_Separator",
+  Z:  "Separator",
+  Cc: "Control",
+  Cf: "Format",
+  Cs: "Surrogate",
+  Co: "Private_Use",
+  Cn: "Unassigned",
+  C:  "Other"
+}
 
 export const CombiningClass = {
   0: "Not_Reordered",
@@ -51,7 +51,7 @@ export const CombiningClass = {
   8: "Kana_Voicing",
   9: "Virama",
   10: "Ccc10",
-  // C"cc[11..199] = [11..199], // Fixed position classes
+  // Ccc[11..199] = [11..199], // Fixed position classes
   200: "Attached_Below_Left",
   202: "Attached_Below",
   204: "Marks_attached_at_the_bottom_right",
@@ -71,4 +71,4 @@ export const CombiningClass = {
   233: "Double_Below",
   234: "Double_Above",
   240: "Iota_Subscript",
-};
+}

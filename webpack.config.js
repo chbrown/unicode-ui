@@ -1,7 +1,7 @@
-var path = require('path');
-var webpack = require('webpack');
+var path = require('path')
+var webpack = require('webpack')
 
-var env = process.env.NODE_ENV || 'development';
+var env = process.env.NODE_ENV || 'development'
 
 module.exports = {
   entry: {
@@ -40,4 +40,4 @@ module.exports = {
       },
     ],
   },
-};
+}
