@@ -42,7 +42,8 @@
   "scripts": {
     "prepare": "tsc",
     "prepublishOnly": "NODE_ENV=production webpack --config webpack.config.js",
-    "start": "webpack --watch --config webpack.config.js & tsc -w"
+    "start": "webpack --watch --config webpack.config.js & tsc -w",
+    "clean": "tsc --listEmittedFiles | sed 's/^TSFILE: //' | xargs rm -v"
   },
   "babel": {
     "presets": [
