@@ -1,5 +1,6 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
+import * as PropTypes from 'prop-types'
 import {createHashHistory, useQueries} from 'history'
 import {Router, Route, IndexRedirect, hashHistory, useRouterHistory} from 'react-router'
 import {Block, Character} from 'unidata'
@@ -241,7 +242,7 @@ class CharactersView extends React.Component<{location: Location}, CharactersPar
 }
 // TypeScript / React.d.ts chokes on a normal `static contextTypes = { ... }`
 CharactersView['contextTypes'] = {
-  router: React.PropTypes.object.isRequired,
+  router: PropTypes.object.isRequired,
 }
 
 /**
@@ -382,7 +383,7 @@ class StringView extends React.Component<{location: Location}, {input: string}> 
   }
 }
 StringView['contextTypes'] = {
-  router: React.PropTypes.object.isRequired,
+  router: PropTypes.object.isRequired,
 }
 
 class App extends React.Component<{children: any, location: any}, {}> {
