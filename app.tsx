@@ -1,22 +1,13 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import * as PropTypes from 'prop-types'
-import {createHashHistory, useQueries} from 'history'
-import {Router, Route, IndexRedirect, hashHistory, useRouterHistory} from 'react-router'
+import {parse, stringify} from 'query-string'
+import {Redirect, Route, Switch} from 'react-router'
+import {HashRouter, NavLink} from 'react-router-dom'
 import {Block, Character} from 'unidata'
 import {Blocks, Characters, GeneralCategories, CombiningClass} from './unicode'
 
 import './site.less'
-
-// HistoryModule.Location isn't terribly nice to use, since query has type `Object`, not `any`
-interface Location {
-  pathname: string
-  search: string
-  query: any
-  state: any
-  action: string
-  key: string
-}
 
 function pruneObject<T>(source: T, falsyValues = [undefined, null, '']): T {
   const target: T = {} as any
@@ -126,13 +117,13 @@ function findCharacters({start, end, name, cat}: {start: number, end: number, na
 }
 class CharactersView extends React.Component<{location: Location}, CharactersParams & {characters?: Character[]}> {
   _findCharactersQueued = false
-  constructor() {
-    super()
+  constructor(props) {
+    super(props)
     this.state = Object.assign({characters: []}, defaultCharactersParams)
     this.refreshCharacters()
   }
   componentWillMount() {
-    const {start, end, name, cat, limit} = this.props.location.query
+    const {start, end, name, cat, limit} = parse(this.props.location.search)
     this.setState(pruneObject({start, end, name, cat, limit}))
   }
   onBlockChange(ev: Event) {
@@ -149,14 +140,12 @@ class CharactersView extends React.Component<{location: Location}, CharactersPar
     const value = (ev.target as HTMLInputElement).value
     this.setParams({[key]: value})
   }
-  /** wrapper around setState */
+  /** wrapper around setState that persists selected state to the router/URL */
   setParams(params) {
-    // setState's type declarations are wrong. It shouldn't require that the
-    // argument be a full state, but only a subset of the state interface.
     this.setState(params, () => {
-      const {start, end, name, cat, limit} = pruneObject(this.state)
-      const query = pruneObject({start, end, name, cat, limit})
-      this.context['router'].push({pathname: this.props.location.pathname, query})
+      const {start, end, name, cat, limit} = this.state
+      const search = stringify(pruneObject({start, end, name, cat, limit}))
+      this.context['router'].history.push({search})
     })
     // recompute matchingCharacters
     this.refreshCharacters()
@@ -354,15 +343,20 @@ const NormalizationTable = ({input, form}: {input: string, form: string}) => {
   )
 }
 class StringView extends React.Component<{location: Location}, {input: string}> {
-  constructor() {
-    super()
+  constructor(props) {
+    super(props)
     this.state = {input: ''}
+  }
+  componentWillMount() {
+    const {input} = parse(this.props.location.search)
+    this.setState(pruneObject({input}))
   }
   onInputChanged(ev) {
     const input = ev.target.value
-    this.setState({input})
-    const query = pruneObject({input})
-    this.context['router'].push({pathname: this.props.location.pathname, query})
+    this.setState({input}, () => {
+      const search = stringify(pruneObject({input}))
+      this.context['router'].history.push({search})
+    })
   }
   render() {
     const normalizationForms = ['Original', 'Custom', 'NFC', 'NFD', 'NFKC', 'NFKD']
@@ -386,36 +380,20 @@ StringView['contextTypes'] = {
   router: PropTypes.object.isRequired,
 }
 
-class App extends React.Component<{children: any, location: any}, {}> {
-  render() {
-    const {pathname} = this.props.location
-    const tabs = [
-      {href: "/characters", content: "Character Table"},
-      {href: "/string", content: "String"},
-    ]
-    return (
-      <div>
-        <nav>
-          {tabs.map(tab =>
-            <span key={tab.href} className={`tab ${pathname === tab.href ? 'current' : ''}`}>
-              <a href={`#${tab.href}`}>{tab.content}</a>
-            </span>
-          )}
-        </nav>
-        <main>{this.props.children}</main>
-      </div>
-    )
-  }
-}
-
-const appHistory = useRouterHistory(useQueries(createHashHistory))({queryKey: false})
-
 ReactDOM.render((
-  <Router history={appHistory}>
-    <Route path="/" component={App}>
-      <IndexRedirect to="/characters" />
-      <Route path="characters" component={CharactersView} />
-      <Route path="string" component={StringView} />
-    </Route>
-  </Router>
+  <HashRouter>
+    <div>
+      <nav>
+        <NavLink to="/characters" className="tab" activeClassName="current">Character Table</NavLink>
+        <NavLink to="/string" className="tab" activeClassName="current">String</NavLink>
+      </nav>
+      <main>
+        <Switch>
+          <Route path="/characters" component={CharactersView} />
+          <Route path="/string" component={StringView} />
+          <Redirect path="*" to="/characters" />
+        </Switch>
+      </main>
+    </div>
+  </HashRouter>
 ), document.getElementById('app'))
