@@ -6,6 +6,9 @@
   },
   "files": [
     "app.tsx",
-    "unicode.ts"
+    "unicode.ts",
+    "views/CharactersView.tsx",
+    "views/StringView.tsx",
+    "views/UcdTable.tsx"
   ]
 }
