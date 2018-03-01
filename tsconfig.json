@@ -8,6 +8,7 @@
     "app.tsx",
     "storage.ts",
     "unicode.ts",
+    "util.ts",
     "views/CharactersView.tsx",
     "views/LocalSettingsView.tsx",
     "views/StringView.tsx",
