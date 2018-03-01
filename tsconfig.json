@@ -6,8 +6,10 @@
   },
   "files": [
     "app.tsx",
+    "storage.ts",
     "unicode.ts",
     "views/CharactersView.tsx",
+    "views/LocalSettingsView.tsx",
     "views/StringView.tsx",
     "views/UcdTable.tsx"
   ]
