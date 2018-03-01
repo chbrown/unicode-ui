@@ -4,8 +4,6 @@ import {parse, stringify} from 'query-string'
 
 import storage from '../storage'
 
-const allBases = ['dec', 'hex', 'oct']
-
 interface LocalSettingsState {
   selectedBases: Set<string>
 }
@@ -35,7 +33,7 @@ class LocalSettingsView extends React.Component<{}, LocalSettingsState> {
       <div>
         <section className="hpad">
           <h3>Char Code Bases</h3>
-          {allBases.map(base =>
+          {storage.allBases.map(base =>
             <div key={base}>
               <label>
                 <input type="checkbox"

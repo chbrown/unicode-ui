@@ -1,4 +1,7 @@
 export default {
+  get allBases(): string[] {
+    return ['dec', 'hex', 'oct']
+  },
   get selectedBases(): Set<string> {
     const data = localStorage.getItem('selectedBases') || ''
     return new Set(data.split(',').filter(s => s))
