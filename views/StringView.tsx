@@ -2,6 +2,8 @@ import * as React from 'react'
 import * as PropTypes from 'prop-types'
 import {parse, stringify} from 'query-string'
 
+import storage from '../storage'
+
 /**
 modifiers modify the character after them.
 combiners modify the character before them.
@@ -56,6 +58,17 @@ export function normalize(raw: string): string {
 function charCodeUrl(charCode: number): string {
   return `#/characters?start=${charCode}&end=${charCode}`
 }
+function charCodeString(charCode: number, base: string): string {
+  if (base == 'hex') {
+    return `0x${charCode.toString(16).toUpperCase()}`
+  }
+  else if (base == 'oct') {
+    return `\\${charCode.toString(8)}`
+  }
+  else {
+    return charCode.toString()
+  }
+}
 const CharCodesTable = ({charCodes}: {charCodes: number[]}) => {
   return (
     <table className="string">
@@ -70,24 +83,18 @@ const CharCodesTable = ({charCodes}: {charCodes: number[]}) => {
           <th>str</th>
           {charCodes.map((charCode, i) => <td key={i}>{String.fromCharCode(charCodes[i])}</td>)}
         </tr>
-        <tr>
-          <th>dec</th>
-          {charCodes.map((charCode, i) =>
-            <td key={i}><a href={charCodeUrl(charCode)}>{charCode.toString()}</a></td>
-          )}
-        </tr>
-        <tr>
-          <th>hex</th>
-          {charCodes.map((charCode, i) =>
-            <td key={i}><a href={charCodeUrl(charCode)}>0x{charCode.toString(16).toUpperCase()}</a></td>
-          )}
-        </tr>
-        <tr>
-          <th>oct</th>
-          {charCodes.map((charCode, i) =>
-            <td key={i}><a href={charCodeUrl(charCode)}>\\{charCode.toString(8)}</a></td>
-          )}
-        </tr>
+        {[...storage.selectedBases].map(base =>
+          <tr key={base}>
+            <th>{base}</th>
+            {charCodes.map((charCode, i) =>
+              <td key={i}>
+                <a href={charCodeUrl(charCode)}>
+                  {charCodeString(charCode, base)}
+                </a>
+              </td>
+            )}
+          </tr>
+        )}
       </tbody>
     </table>
   )
