@@ -64,6 +64,9 @@ export function charCodeString(charCode: number, base: string): string {
   else if (base == 'oct') {
     return `\\${charCode.toString(8)}`
   }
+  else if (base == 'bin') {
+    return `0b${charCode.toString(2)}`
+  }
   else {
     return charCode.toString()
   }

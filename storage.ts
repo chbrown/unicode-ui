@@ -1,6 +1,6 @@
 export default {
   get allBases(): string[] {
-    return ['dec', 'hex', 'oct']
+    return ['dec', 'hex', 'oct', 'bin']
   },
   get selectedBases(): Set<string> {
     const data = localStorage.getItem('selectedBases') || ''
