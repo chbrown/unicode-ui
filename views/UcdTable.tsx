@@ -1,20 +1,28 @@
 import * as React from 'react'
 import {Character} from 'unidata'
 
+import storage from '../storage'
+import {charCodeString} from '../util'
 import {GeneralCategories, CombiningClass} from '../unicode'
 
-class UcdRow extends React.Component<{character: Character}, {}> {
+interface UcdRowProps {
+  character: Character
+  bases: string[]
+}
+
+class UcdRow extends React.Component<UcdRowProps, {}> {
   shouldComponentUpdate(nextProps) {
     return nextProps.character !== this.props.character
   }
   render() {
-    const {character} = this.props
+    const {bases, character} = this.props
     return (
       <tr>
-        <td className="num">{character.code.toString()}</td>
-        <td className="num">{character.code.toString(16).toUpperCase()}</td>
-        <td className="num">{character.code.toString(8)}</td>
-        <td className="num">{character.code.toString(2)}</td>
+        {bases.map(base =>
+          <td key={base} className="num">
+            {charCodeString(character.code, base)}
+          </td>
+        )}
         <td className="str">{String.fromCodePoint(character.code)}</td>
         <td>{character.name}</td>
         <td>{GeneralCategories[character.cat]}</td>
@@ -36,14 +44,14 @@ class UcdTable extends React.Component<{characters: Character[]}, {}> {
   }
   render() {
     const {characters} = this.props
+    const bases = [...storage.selectedBases]
     return (
       <table className="characters fill padded lined striped">
         <thead>
           <tr>
-            <th>dec</th>
-            <th>hex</th>
-            <th>oct</th>
-            <th>bin</th>
+            {bases.map(base =>
+              <th key={base}>{base}</th>
+            )}
             <th>Character</th>
             <th>Name</th>
             <th>GeneralCategory</th>
@@ -57,7 +65,7 @@ class UcdTable extends React.Component<{characters: Character[]}, {}> {
         </thead>
         <tbody>
           {characters.map((character, i) =>
-            <UcdRow key={i} character={character} />
+            <UcdRow key={i} character={character} bases={bases} />
           )}
         </tbody>
       </table>
