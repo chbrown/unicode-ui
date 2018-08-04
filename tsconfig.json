@@ -3,15 +3,5 @@
     "jsx": "react",
     "module": "commonjs",
     "target": "ES6"
-  },
-  "files": [
-    "app.tsx",
-    "storage.ts",
-    "unicode.ts",
-    "util.ts",
-    "views/CharactersView.tsx",
-    "views/LocalSettingsView.tsx",
-    "views/StringView.tsx",
-    "views/UcdTable.tsx"
-  ]
+  }
 }
