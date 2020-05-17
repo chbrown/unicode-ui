@@ -1,9 +1,10 @@
 import * as React from 'react'
 import * as PropTypes from 'prop-types'
-import {parse, stringify} from 'query-string'
+import {stringify} from 'query-string'
 import {Character} from 'unidata'
 
 import {Blocks, Characters, GeneralCategories} from '../unicode'
+import {parseQuery} from '../util'
 import UcdTable from './UcdTable'
 
 function isEmpty(val: any): boolean {
@@ -58,8 +59,17 @@ class CharactersView extends React.Component<{location: Location}, CharactersPar
     this.refreshCharacters()
   }
   componentWillMount() {
-    const {start, end, name, cat, limit} = parse(this.props.location.search)
-    this.setState(pruneObject({start, end, name, cat, limit}))
+    const {
+      start = [], end = [], name = [], cat = [], limit = []
+    } = parseQuery(this.props.location.search)
+    const rawState = {
+      start: start.join(''),
+      end: end.join(''),
+      name: name.join(''),
+      cat: cat.join(''),
+      limit: limit.join(''),
+    }
+    this.setState(pruneObject(rawState))
   }
   onBlockChange(ev: Event) {
     // not being able to pass raw objects easily in a select is one disadvantage of React

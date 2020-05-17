@@ -1,9 +1,9 @@
 import * as React from 'react'
 import * as PropTypes from 'prop-types'
-import {parse, stringify} from 'query-string'
+import {stringify} from 'query-string'
 
 import storage from '../storage'
-import {normalize, charCodeUrl, charCodeString} from '../util'
+import {normalize, charCodeUrl, charCodeString, parseQuery} from '../util'
 
 const CharCodesTable = ({charCodes}: {charCodes: number[]}) => {
   return (
@@ -58,8 +58,8 @@ const NormalizationTable = ({input, form}: {input: string, form: string}) => {
 class StringView extends React.Component<{location: Location}, {input: string}> {
   constructor(props) {
     super(props)
-    const {input = ''} = parse(this.props.location.search)
-    this.state = {input}
+    const {input = []} = parseQuery(this.props.location.search)
+    this.state = {input: input.join('')}
   }
   onInputChanged(ev) {
     const input = ev.target.value
