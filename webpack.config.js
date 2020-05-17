@@ -1,42 +1,49 @@
-var path = require('path')
-var webpack = require('webpack')
+const {resolve} = require('path')
 
-var env = process.env.NODE_ENV || 'development'
+const webpack = require('webpack')
+
+const mode = process.env.NODE_ENV || 'development'
 
 module.exports = {
+  mode,
   entry: {
     app: './app',
     unidata: ['unidata'],
   },
   output: {
-    path: path.join(__dirname, 'build'),
+    path: resolve(__dirname, 'build'),
     filename: 'bundle.js',
   },
+  // exclude unidata from bundle.js and include it separately
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        unidata: {
+          chunks: 'all',
+          test: /[\\/]node_modules[\\/]unidata[\\/]/,
+          name: 'unidata',
+          filename: '[name].js',
+        }
+      }
+    }
+  },
   plugins: [
-    // exclude unidata from bundle.js and include it separately
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'unidata',
-      filename: 'unidata.js',
-    }),
     // enable production builds:
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify(env),
+      'process.env.NODE_ENV': JSON.stringify(mode),
     }),
-    ...(env === 'development' ? [
-      new webpack.NoEmitOnErrorsPlugin(),
-    ] : [
-      new webpack.optimize.UglifyJsPlugin(),
-    ]),
   ],
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.js$/,
-        loaders: ['babel-loader'],
+        exclude: /node_modules/,
+        use: ['babel-loader'],
       },
       {
         test: /\.less$/,
-        loaders: ['style-loader', 'css-loader', 'less-loader'],
+        exclude: /node_modules/,
+        use: ['style-loader', 'css-loader', 'less-loader'],
       },
     ],
   },
