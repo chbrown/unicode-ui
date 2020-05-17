@@ -47,8 +47,8 @@
   },
   "scripts": {
     "prepare": "tsc",
-    "prepublishOnly": "NODE_ENV=production webpack --config webpack.config.js",
-    "start": "webpack --watch --config webpack.config.js & tsc -w",
+    "prepublishOnly": "NODE_ENV=production webpack",
+    "start": "webpack --watch & tsc -w",
     "clean": "tsc --listEmittedFiles | grep '^TSFILE: ' | sed 's/^TSFILE: //' | xargs rm -v"
   },
   "babel": {
