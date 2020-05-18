@@ -1,5 +1,3 @@
-const {resolve} = require('path')
-
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
@@ -7,15 +5,7 @@ const mode = process.env.NODE_ENV || 'development'
 
 module.exports = {
   mode,
-  entry: {
-    app: './app',
-    unidata: ['unidata'],
-  },
-  output: {
-    path: resolve(__dirname, 'build'),
-    filename: 'bundle.js',
-  },
-  // exclude unidata from bundle.js and include it separately
+  // exclude unidata from main bundle, to be included separately
   optimization: {
     splitChunks: {
       cacheGroups: {
@@ -24,9 +14,9 @@ module.exports = {
           test: /[\\/]node_modules[\\/]unidata[\\/]/,
           name: 'unidata',
           filename: '[name].js',
-        }
-      }
-    }
+        },
+      },
+    },
   },
   plugins: [
     new HtmlWebpackPlugin({
