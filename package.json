@@ -48,8 +48,8 @@
   "scripts": {
     "prepare": "tsc",
     "prepublishOnly": "NODE_ENV=production webpack",
-    "start": "webpack --watch & tsc -w",
-    "clean": "tsc --listEmittedFiles | grep '^TSFILE: ' | sed 's/^TSFILE: //' | xargs rm -v"
+    "start": "webpack --watch & tsc --watch",
+    "clean": "tsc --build --clean"
   },
   "babel": {
     "presets": [
