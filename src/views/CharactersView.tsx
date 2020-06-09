@@ -3,13 +3,9 @@ import * as PropTypes from 'prop-types'
 import {stringify} from 'query-string'
 import {Character} from 'unidata'
 
-import {Blocks, Characters, GeneralCategories} from '../unicode'
+import {Blocks, Characters, GeneralCategories, createCharacterPredicate} from '../unicode'
 import {parseQuery} from '../util'
 import UcdTable from './UcdTable'
-
-function isEmpty(val: any): boolean {
-  return (val === undefined) || (val === null) || (val === '')
-}
 
 function pruneObject<T>(source: T, falsyValues = [undefined, null, '']): T {
   const target: T = {} as any
@@ -35,21 +31,6 @@ const defaultCharactersParams = {
   name: '',
   cat: '',
   limit: '256',
-}
-/** search through all 29K characters in the unidata character set */
-function findCharacters({start, end, name, cat}: {start: number, end: number, name: string, cat: string}) {
-  const ignore_start = isNaN(start)
-  const ignore_end = isNaN(end)
-  const ignore_name = isEmpty(name)
-  const ignore_cat = isEmpty(cat)
-  const matchingCharacters = Characters.filter(character => {
-    const after_start = ignore_start || (character.code >= start)
-    const before_end = ignore_end || (character.code <= end)
-    const name_matches = ignore_name || character.name.includes(name)
-    const cat_matches = ignore_cat || ((character.cat || 'L') === cat)
-    return after_start && before_end && name_matches && cat_matches
-  })
-  return matchingCharacters
 }
 class CharactersView extends React.Component<{location: Location}, CharactersParams & {characters?: Character[]}> {
   _findCharactersQueued = false
@@ -101,12 +82,14 @@ class CharactersView extends React.Component<{location: Location}, CharactersPar
       this._findCharactersQueued = true
       setTimeout(() => {
         const {start, end, name, cat} = this.state
-        const characters = findCharacters({
-          start: parseInt(start, 10),
-          end: parseInt(end, 10),
-          name: name.toUpperCase(),
+        const predicate = createCharacterPredicate(
+          parseInt(start, 10),
+          parseInt(end, 10),
+          name.toUpperCase(),
           cat,
-        })
+        )
+        // search through all 29K characters in the unidata character set
+        const characters = Characters.filter(predicate)
         this.setState({characters})
         this._findCharactersQueued = false
       }, 250)

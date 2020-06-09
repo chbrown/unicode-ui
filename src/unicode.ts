@@ -1,4 +1,4 @@
-import {getBlocks, getCharacters} from 'unidata'
+import {getBlocks, getCharacters, Character} from 'unidata'
 
 export const Characters = getCharacters()
 export const Blocks = getBlocks()
@@ -71,4 +71,17 @@ export const CombiningClass = {
   233: "Double_Below",
   234: "Double_Above",
   240: "Iota_Subscript",
+}
+
+export function createCharacterPredicate(start: number, end: number, name: string, cat: string) {
+  const ignore_start = isNaN(start)
+  const ignore_end = isNaN(end)
+  const ignore_name = !name
+  const ignore_cat = !cat
+  return (character: Character) => (
+    (ignore_start || (character.code >= start)) && // ✔︎ after start
+    (ignore_end || (character.code <= end)) && // ✔︎ before end
+    (ignore_name || character.name.includes(name)) && // ✔︎ name matches
+    (ignore_cat || ((character.cat || 'L') === cat)) // ✔︎ cat matches
+  )
 }
