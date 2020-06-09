@@ -4,19 +4,8 @@ import {stringify} from 'query-string'
 import {Character} from 'unidata'
 
 import {Blocks, Characters, GeneralCategories, createCharacterPredicate} from '../unicode'
-import {parseQuery} from '../util'
+import {parseQuery, pruneObject} from '../util'
 import UcdTable from './UcdTable'
-
-function pruneObject<T>(source: T, falsyValues = [undefined, null, '']): T {
-  const target: T = {} as any
-  Object.keys(source).forEach(key => {
-    const value = source[key]
-    if (falsyValues.indexOf(value) === -1) {
-      target[key] = value
-    }
-  })
-  return target
-}
 
 interface CharactersParams {
   start?: string

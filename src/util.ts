@@ -81,3 +81,14 @@ export function parseQuery(query: string): {[key: string]: string[]} {
     result[key] = Array.isArray(value) ? value : [value]
   }, Object.create(null))
 }
+
+export function pruneObject<T>(source: T, falsyValues = [undefined, null, '']): Partial<T> {
+  const target: Partial<T> = {}
+  Object.keys(source).forEach(key => {
+    const value = source[key]
+    if (!falsyValues.includes(value)) {
+      target[key] = value
+    }
+  })
+  return target
+}
