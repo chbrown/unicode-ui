@@ -79,6 +79,7 @@ export function parseQuery(query: string): {[key: string]: string[]} {
   return Object.keys(obj).reduce((result, key) => {
     const value = obj[key]
     result[key] = Array.isArray(value) ? value : [value]
+    return result
   }, Object.create(null))
 }
 
