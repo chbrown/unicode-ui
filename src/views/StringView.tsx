@@ -1,4 +1,5 @@
 import * as React from 'react'
+import {useHistory} from 'react-router-dom'
 
 import storage from '../storage'
 import {normalize, charCodeUrl, charCodeString} from '../util'
@@ -53,36 +54,35 @@ const NormalizationTable = ({input, form}: {input: string, form: string}) => {
   )
 }
 
-class StringView extends React.Component<{location: Location}, {input: string}> {
-  constructor(props) {
-    super(props)
-    const searchParams = new URLSearchParams(this.props.location.search)
-    this.state = {input: searchParams.get('input') || ''}
-  }
-  onInputChanged(ev) {
-    const input = ev.target.value
-    this.setState({input}, () => {
-      const search = new URLSearchParams({input}).toString()
-      this.context['router'].history.push({search})
-    })
-  }
-  render() {
-    const normalizationForms = ['Original', 'Custom', 'NFC', 'NFD', 'NFKC', 'NFKD']
-    const {input} = this.state
-    return (
-      <div>
-        <section className="hpad">
-          <label>
-            <div><b>Input string</b></div>
-            <input value={input} onChange={this.onInputChanged.bind(this)} />
-          </label>
-        </section>
-        {normalizationForms.map(form =>
-          <NormalizationTable key={form + input} input={input} form={form} />
-        )}
-      </div>
-    )
-  }
+interface StringViewProps {
+  location: Location
+}
+
+function StringView(props: StringViewProps) {
+  const history = useHistory()
+  const [input, setInput] = React.useState(() => {
+    const searchParams = new URLSearchParams(props.location.search)
+    return searchParams.get('input') || ''
+  })
+  // update (push) history whenever input changes
+  React.useEffect(() => {
+    const urlSearchParams = new URLSearchParams({input})
+    history.push({search: urlSearchParams.toString()})
+  }, [input])
+  const normalizationForms = ['Original', 'Custom', 'NFC', 'NFD', 'NFKC', 'NFKD']
+  return (
+    <div>
+      <section className="hpad">
+        <label>
+          <div><b>Input string</b></div>
+          <input value={input} onChange={ev => setInput(ev.target.value)} />
+        </label>
+      </section>
+      {normalizationForms.map(form =>
+        <NormalizationTable key={form + input} input={input} form={form} />
+      )}
+    </div>
+  )
 }
 
 export default StringView
