@@ -1,5 +1,4 @@
 import * as React from 'react'
-import * as PropTypes from 'prop-types'
 
 import storage from '../storage'
 import {normalize, charCodeUrl, charCodeString} from '../util'
@@ -84,9 +83,6 @@ class StringView extends React.Component<{location: Location}, {input: string}> 
       </div>
     )
   }
-}
-StringView['contextTypes'] = {
-  router: PropTypes.object.isRequired,
 }
 
 export default StringView

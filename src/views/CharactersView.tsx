@@ -1,5 +1,4 @@
 import * as React from 'react'
-import * as PropTypes from 'prop-types'
 import {Character} from 'unidata'
 
 import {Blocks, Characters, GeneralCategories, createCharacterPredicate} from '../unicode'
@@ -142,10 +141,6 @@ class CharactersView extends React.Component<{location: Location}, CharactersPar
       </div>
     )
   }
-}
-// TypeScript / React.d.ts chokes on a normal `static contextTypes = { ... }`
-CharactersView['contextTypes'] = {
-  router: PropTypes.object.isRequired,
 }
 
 export default CharactersView
