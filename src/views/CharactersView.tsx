@@ -1,10 +1,9 @@
 import * as React from 'react'
 import * as PropTypes from 'prop-types'
-import {stringify} from 'query-string'
 import {Character} from 'unidata'
 
 import {Blocks, Characters, GeneralCategories, createCharacterPredicate} from '../unicode'
-import {parseQuery, pruneObject} from '../util'
+import {pruneObject} from '../util'
 import UcdTable from './UcdTable'
 
 interface CharactersParams {
@@ -29,15 +28,13 @@ class CharactersView extends React.Component<{location: Location}, CharactersPar
     this.refreshCharacters()
   }
   componentWillMount() {
-    const {
-      start = [], end = [], name = [], cat = [], limit = []
-    } = parseQuery(this.props.location.search)
+    const urlSearchParams = new URLSearchParams(this.props.location.search)
     const rawState = {
-      start: start.join(''),
-      end: end.join(''),
-      name: name.join(''),
-      cat: cat.join(''),
-      limit: limit.join(''),
+      start: urlSearchParams.get('start'),
+      end: urlSearchParams.get('end'),
+      name: urlSearchParams.get('name'),
+      cat: urlSearchParams.get('cat'),
+      limit: urlSearchParams.get('limit'),
     }
     this.setState(pruneObject(rawState))
   }
@@ -59,7 +56,7 @@ class CharactersView extends React.Component<{location: Location}, CharactersPar
   setParams(params) {
     this.setState(params, () => {
       const {start, end, name, cat, limit} = this.state
-      const search = stringify(pruneObject({start, end, name, cat, limit}))
+      const search = new URLSearchParams(pruneObject({start, end, name, cat, limit})).toString()
       this.context['router'].history.push({search})
     })
     // recompute matchingCharacters

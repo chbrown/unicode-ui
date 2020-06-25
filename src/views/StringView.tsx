@@ -1,9 +1,8 @@
 import * as React from 'react'
 import * as PropTypes from 'prop-types'
-import {stringify} from 'query-string'
 
 import storage from '../storage'
-import {normalize, charCodeUrl, charCodeString, parseQuery} from '../util'
+import {normalize, charCodeUrl, charCodeString} from '../util'
 
 const CharCodesTable = ({charCodes}: {charCodes: number[]}) => {
   return (
@@ -58,13 +57,13 @@ const NormalizationTable = ({input, form}: {input: string, form: string}) => {
 class StringView extends React.Component<{location: Location}, {input: string}> {
   constructor(props) {
     super(props)
-    const {input = []} = parseQuery(this.props.location.search)
-    this.state = {input: input.join('')}
+    const searchParams = new URLSearchParams(this.props.location.search)
+    this.state = {input: searchParams.get('input') || ''}
   }
   onInputChanged(ev) {
     const input = ev.target.value
     this.setState({input}, () => {
-      const search = stringify({input})
+      const search = new URLSearchParams({input}).toString()
       this.context['router'].history.push({search})
     })
   }

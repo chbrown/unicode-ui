@@ -1,5 +1,3 @@
-import {parse} from 'query-string'
-
 /**
 modifiers modify the character after them.
 combiners modify the character before them.
@@ -71,16 +69,6 @@ export function charCodeString(charCode: number, base: string): string {
   else {
     return charCode.toString()
   }
-}
-
-/** Fix a bad API design choice by a popular and useful library :| */
-export function parseQuery(query: string): {[key: string]: string[]} {
-  const obj = parse(query)
-  return Object.keys(obj).reduce((result, key) => {
-    const value = obj[key]
-    result[key] = Array.isArray(value) ? value : [value]
-    return result
-  }, Object.create(null))
 }
 
 export function pruneObject<T>(source: T, falsyValues = [undefined, null, '']): Partial<T> {
